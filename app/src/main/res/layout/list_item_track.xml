@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal">
+
+    <!-- TODO Placeholder ImageView – replace with actual image when fetching data is ready
+              and remove dimensions -->
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minWidth="?android:attr/listPreferredItemHeight"
+        android:padding="@dimen/artist_search_image_view_padding"
+        />
+
+    <TextView
+        android:id="@+id/album_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:textAppearanceListItem"
+        android:gravity="center_vertical"
+        android:padding="@dimen/artist_search_text_view_padding"
+        android:minHeight="?android:attr/listPreferredItemHeight"/>
+
+
+    <TextView
+        android:id="@+id/track_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:textAppearanceListItem"
+        android:gravity="center_vertical"
+        android:padding="@dimen/artist_search_text_view_padding"
+        android:minHeight="?android:attr/listPreferredItemHeight"/>
+</LinearLayout>
+

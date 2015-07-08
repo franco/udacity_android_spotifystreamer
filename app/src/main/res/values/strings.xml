@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Spotify Streamer</string>
-    <string name="title_activity_artist_search">ArtistSearchActivity</string>
+    <string name="title_activity_artist_search" translatable="false">@string/app_name</string>
     <string name="action_settings">Settings</string>
     <string name="no_artist_found">No artists found</string>
+    <string name="title_activity_top_tracks">TopTracksActivity</string>
 </resources>
