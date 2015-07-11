@@ -4,18 +4,26 @@
               android:layout_height="match_parent"
               android:orientation="horizontal">
 
-    <!-- TODO Placeholder ImageView – replace with actual image when fetching data is ready
-              and remove dimensions -->
+    <!--<ImageView-->
+        <!--android:id="@+id/thumbnail"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:minHeight="?android:attr/listPreferredItemHeight"-->
+        <!--android:minWidth="?android:attr/listPreferredItemHeight"-->
+        <!--android:padding="@dimen/artist_search_image_view_padding"-->
+        <!--android:src="@drawable/placeholder_image"-->
+        <!--/>-->
+
+
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
-        android:minWidth="?android:attr/listPreferredItemHeight"
+        android:id="@+id/thumbnail"
+        android:layout_width="@dimen/thumbnail_size"
+        android:layout_height="@dimen/thumbnail_size"
         android:padding="@dimen/artist_search_image_view_padding"
-        />
+        android:src="@drawable/placeholder_image"/>
 
     <TextView
-        android:id="@+id/artist_search_result_textview"
+        android:id="@+id/artist_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:textAppearanceListItem"

@@ -6,16 +6,30 @@
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:paddingBottom="@dimen/activity_vertical_margin"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 tools:context="com.example.android.spotifystreamer.ArtistSearchActivityFragment">
 
     // TODO check if SearchView woudn't be better before submitting
+    <!--<EditText-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/search_artist_editText"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:inputType="textFilter"-->
+        <!--android:imeOptions="actionSearch"/>-->
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/search_artist_editText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:inputType="textFilter"/>
+        android:inputType="textFilter"
+        android:imeOptions="actionSearch"/>
+
+
     <ListView
         android:id="@+id/list_view_artist_search"
         android:layout_width="match_parent"

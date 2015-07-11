@@ -5,4 +5,6 @@
 
     <dimen name="artist_search_image_view_padding">8dp</dimen>
     <dimen name="artist_search_text_view_padding">8dp</dimen>
+
+    <dimen name="thumbnail_size">64dp</dimen>
 </resources>
