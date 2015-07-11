@@ -9,13 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.spotifystreamer.R;
+import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.util.ImageUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Image;
 
 /**
  * Class ArtistsAdapter is a specialized ArrayAdapter<Artist> for artist_search_result ListView.
@@ -65,13 +64,9 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
         // Populate data
         holder.name.setText(artist.name);
 
-        // Choose an image that is as close as possible to the target dimensions it is going
-        // to be displayed (in order to reduce download size).
-        Image thumbnail = ImageUtils.findImageWithClosestSize(artist.images, mThumbnailSize);
-
-        if (thumbnail != null) {
-           Picasso.with(getContext()).load(thumbnail.url)
-                   .resize(mThumbnailSize, mThumbnailSize)
+        if (artist.hasThumbnailUrl()) {
+            Picasso.with(getContext()).load(artist.thumbnailUrl)
+                    .resize(mThumbnailSize, mThumbnailSize)
                     .centerInside()
                     .into(holder.thumbnail);
         }

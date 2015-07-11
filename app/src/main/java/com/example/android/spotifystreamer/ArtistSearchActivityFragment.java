@@ -1,5 +1,7 @@
 package com.example.android.spotifystreamer;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,20 +10,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.spotifystreamer.adapter.ArtistsAdapter;
+import com.example.android.spotifystreamer.model.Artist;
+import com.example.android.spotifystreamer.model.ArtistBuilder;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.SpotifyService;;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-
 
 
 /**
@@ -29,6 +31,9 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class ArtistSearchActivityFragment extends Fragment {
 
+    private static final String STATE_ARTISTS = "state_artists";
+
+    ArrayList<Artist> mArtists;
     ArtistsAdapter mArtistsAdapter;
 
     public ArtistSearchActivityFragment() {
@@ -47,11 +52,26 @@ public class ArtistSearchActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artist_search, container, false);
 
-        mArtistsAdapter = new ArtistsAdapter(getActivity(), new ArrayList<Artist>());
+        if (savedInstanceState != null) {
+            mArtists = savedInstanceState.getParcelableArrayList(STATE_ARTISTS);
+        } else {
+            mArtists = new ArrayList<>();
+        }
 
-        // Get a reference to the ListView, and attach the adapter
+        mArtistsAdapter = new ArtistsAdapter(getActivity(), mArtists);
+
+        // Get a reference to the ListView, attach the adapter, and set onItemClickListener
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_artist_search);
         listView.setAdapter(mArtistsAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Artist artist = mArtistsAdapter.getItem(i);
+                Intent intent = new Intent(getActivity(), TopTracksActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, artist.id);
+                startActivity(intent);
+            }
+        });
 
         // Set up the searchView
         EditText searchView = (EditText) rootView.findViewById(R.id.search_artist_editText);
@@ -61,7 +81,7 @@ public class ArtistSearchActivityFragment extends Fragment {
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
                 boolean consumed = false;
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    new SearchArtistTask().execute(textView.getText().toString());
+                    new SearchArtistTask(getActivity()).execute(textView.getText().toString());
 
                     // By setting consumed to false the soft-keyboard will be hidden
                     consumed = false;
@@ -73,9 +93,23 @@ public class ArtistSearchActivityFragment extends Fragment {
         return rootView;
     }
 
-    private class SearchArtistTask extends AsyncTask<String, Void, List<Artist>> {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STATE_ARTISTS, mArtists);
+    }
+
+    private class SearchArtistTask extends AsyncTask<String, Void, ArrayList<Artist>> {
+
+        private ArtistBuilder mArtistBuilder;
+
+
+        public SearchArtistTask(Context context) {
+            mArtistBuilder = new ArtistBuilder(context);
+        }
+
         @Override
-        protected List<Artist> doInBackground(String... params) {
+        protected ArrayList<Artist> doInBackground(String... params) {
 
             // Query Spotify server
             SpotifyApi api = new SpotifyApi();
@@ -83,13 +117,15 @@ public class ArtistSearchActivityFragment extends Fragment {
 
             // TODO try ... catch for error handling NullPointerException, etc...
             ArtistsPager results = service.searchArtists(params[0]);
-            return results.artists.items;
+
+            return mArtistBuilder.fromSpotifyArtists(results.artists.items);
         }
 
         @Override
-        protected void onPostExecute(List<Artist> artists) {
+        protected void onPostExecute(ArrayList<Artist> artists) {
+            mArtists = artists;
             mArtistsAdapter.clear();
-            mArtistsAdapter.addAll(artists);
+            mArtistsAdapter.addAll(mArtists);
         }
     }
 }
