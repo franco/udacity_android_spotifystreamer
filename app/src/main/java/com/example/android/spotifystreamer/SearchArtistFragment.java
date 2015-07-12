@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -98,11 +99,23 @@ public class SearchArtistFragment extends Fragment {
                 boolean consumed = false;
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     new SearchArtistTask(getActivity()).execute(textView.getText().toString());
-
-                    // By setting consumed to false the soft-keyboard will be hidden
-                    consumed = false;
+                    textView.clearFocus();
+                    consumed = true;
                 }
                 return consumed;
+            }
+        });
+
+        // Unfortunately the soft-keyboard needs to be hidden manually. See
+        // http://stackoverflow.com/a/15413327 and http://stackoverflow.com/a/1662088
+        searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    InputMethodManager imm = (InputMethodManager)
+                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
             }
         });
 
