@@ -119,8 +119,6 @@ public class TopTracksFragment extends Fragment {
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
 
-
-            // TODO try ... catch for error handling NullPointerException, etc...
             Map<String, Object> options = new HashMap<>();
             options.put(SpotifyService.COUNTRY, Utils.getDefaultCountry());
             Tracks tracks = service.getArtistTopTrack(params[0], options);

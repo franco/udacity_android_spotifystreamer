@@ -145,7 +145,6 @@ public class SearchArtistFragment extends Fragment {
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
 
-            // TODO try ... catch for error handling NullPointerException, etc...
             ArtistsPager results = service.searchArtists(params[0]);
 
             return mArtistBuilder.fromSpotifyArtists(results.artists.items);
