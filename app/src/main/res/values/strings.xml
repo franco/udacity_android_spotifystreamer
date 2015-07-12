@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2015 Franco Sebregondi.
+  -->
+
 <resources>
     <string name="app_name">Spotify Streamer</string>
     <string name="title_activity_top_tracks">Top 10 Tracks</string>

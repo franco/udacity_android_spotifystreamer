@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015 Franco Sebregondi.
+ */
+
 apply plugin: 'com.android.application'
 
 android {
