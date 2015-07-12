@@ -42,7 +42,7 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             view = LayoutInflater.from(getContext()).inflate(
-                    R.layout.list_item_artist_search_result,
+                    R.layout.list_item_artist,
                     parent,
                     false);
 

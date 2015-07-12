@@ -32,14 +32,14 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Fragment for searching artists.
  */
-public class ArtistSearchActivityFragment extends Fragment {
+public class SearchArtistFragment extends Fragment {
 
     private static final String STATE_ARTISTS = "state_artists";
 
     ArrayList<Artist> mArtists;
     ArtistsAdapter mArtistsAdapter;
 
-    public ArtistSearchActivityFragment() {
+    public SearchArtistFragment() {
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ArtistSearchActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_artist_search, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_search_artist, container, false);
 
         if (savedInstanceState != null) {
             mArtists = savedInstanceState.getParcelableArrayList(STATE_ARTISTS);
@@ -71,7 +71,7 @@ public class ArtistSearchActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Artist artist = mArtistsAdapter.getItem(i);
                 Intent intent = new Intent(getActivity(), TopTracksActivity.class);
-                intent.putExtra(TopTracksActivityFragment.EXTRA_ARTIST, artist);
+                intent.putExtra(TopTracksFragment.EXTRA_ARTIST, artist);
                 startActivity(intent);
             }
         });

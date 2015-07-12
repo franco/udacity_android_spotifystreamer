@@ -31,7 +31,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class TopTracksActivityFragment extends Fragment {
+public class TopTracksFragment extends Fragment {
 
     public static final String EXTRA_ARTIST = "artist";
     private static final String STATE_ARTIST = "state_artist" ;
@@ -42,7 +42,7 @@ public class TopTracksActivityFragment extends Fragment {
     private ArrayList<MyTrack> mTopTracks;
     private TopTracksAdapter mTopTracksAdapter;
 
-    public TopTracksActivityFragment() {
+    public TopTracksFragment() {
     }
 
     @Override
