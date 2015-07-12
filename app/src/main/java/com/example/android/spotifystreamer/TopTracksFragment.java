@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,8 +64,10 @@ public class TopTracksFragment extends Fragment {
             mTopTracks = new ArrayList<>();
         }
 
-
         mTopTracksAdapter = new TopTracksAdapter(getActivity(), mTopTracks);
+
+        // Set action bar subtitle
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
 
         // Get a reference to the ListView, and attach the adapter
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_top_tracks);
