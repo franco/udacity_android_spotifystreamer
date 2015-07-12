@@ -1,6 +1,8 @@
 package com.example.android.spotifystreamer;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.spotifystreamer.adapter.ArtistsAdapter;
 import com.example.android.spotifystreamer.model.Artist;
@@ -102,6 +105,7 @@ public class ArtistSearchActivityFragment extends Fragment {
     private class SearchArtistTask extends AsyncTask<String, Void, ArrayList<Artist>> {
 
         private ArtistBuilder mArtistBuilder;
+        private ProgressDialog mProgressDialog;
 
 
         public SearchArtistTask(Context context) {
@@ -126,6 +130,33 @@ public class ArtistSearchActivityFragment extends Fragment {
             mArtists = artists;
             mArtistsAdapter.clear();
             mArtistsAdapter.addAll(mArtists);
+
+            mProgressDialog.dismiss();
+            if (artists.size() < 1) {
+                Toast.makeText(getActivity(), R.string.no_artist_found, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog.show(getActivity(),
+                    null,
+                    getResources().getString(R.string.loading_text),
+                    true,
+                    true);
+
+            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                    mProgressDialog.cancel();
+                }
+            });
+        }
+
+        @Override
+        protected void onCancelled(ArrayList<Artist> artists) {
+            mProgressDialog.dismiss();
         }
     }
 }

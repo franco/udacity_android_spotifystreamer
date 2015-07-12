@@ -1,6 +1,8 @@
 package com.example.android.spotifystreamer;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.spotifystreamer.adapter.TopTracksAdapter;
 import com.example.android.spotifystreamer.model.Artist;
@@ -80,7 +83,7 @@ public class TopTracksActivityFragment extends Fragment {
     private class SearchTrackTask extends AsyncTask<String, Void, ArrayList<MyTrack>> {
 
         private TrackBuilder mTrackBuilder;
-
+        private ProgressDialog mProgressDialog;
 
         public SearchTrackTask(Context context) {
             mTrackBuilder = new TrackBuilder(context);
@@ -107,6 +110,25 @@ public class TopTracksActivityFragment extends Fragment {
             mTopTracks = topTracks;
             mTopTracksAdapter.clear();
             mTopTracksAdapter.addAll(topTracks);
+
+            mProgressDialog.dismiss();
+            if (topTracks.size() < 1) {
+                Toast.makeText(getActivity(), R.string.no_tracks_found, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog.show(getActivity(),
+                    null,
+                    getResources().getString(R.string.loading_text),
+                    true,
+                    false);
+        }
+
+        @Override
+        protected void onCancelled(ArrayList<MyTrack> topTracks) {
+            mProgressDialog.dismiss();
         }
     }
 }
