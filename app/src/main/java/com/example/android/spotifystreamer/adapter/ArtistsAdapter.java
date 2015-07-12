@@ -66,7 +66,8 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
         if (artist.hasThumbnailUrl()) {
             Picasso.with(getContext()).load(artist.thumbnailUrl)
                     .resize(mThumbnailSize, mThumbnailSize)
-                    .centerInside()
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image)
                     .into(holder.thumbnail);
         }
 

@@ -62,7 +62,8 @@ public class TopTracksAdapter extends ArrayAdapter<MyTrack> {
         if (track.hasThumbnailUrl()) {
             Picasso.with(getContext()).load(track.thumbnailUrl)
                     .resize(mThumbnailSize, mThumbnailSize)
-                    .centerInside()
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image)
                     .into(holder.thumbnail);
         }
 
