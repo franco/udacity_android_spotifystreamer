@@ -21,9 +21,8 @@
 
 package com.example.android.spotifystreamer;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-
+import android.support.v7.app.ActionBarActivity;
 
 public class SearchArtistActivity extends ActionBarActivity {
 

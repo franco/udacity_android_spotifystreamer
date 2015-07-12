@@ -70,7 +70,7 @@ public class TrackBuilder {
     public ArrayList<MyTrack> fromSpotifyTracks(List<Track> spotifyTracks) {
 
         ArrayList<MyTrack> tracks = new ArrayList<>();
-        for (Track spotifyTrack: spotifyTracks) {
+        for (Track spotifyTrack : spotifyTracks) {
             tracks.add(fromSpotifyTrack(spotifyTrack));
         }
         return tracks;

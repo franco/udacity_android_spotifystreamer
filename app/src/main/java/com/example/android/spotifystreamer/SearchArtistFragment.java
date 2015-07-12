@@ -46,7 +46,7 @@ import com.example.android.spotifystreamer.model.ArtistBuilder;
 import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;;
+import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 

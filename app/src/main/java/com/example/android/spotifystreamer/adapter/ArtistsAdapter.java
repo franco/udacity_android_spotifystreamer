@@ -37,12 +37,12 @@ import java.util.List;
 
 
 /**
- * Class ArtistsAdapter is a specialized ArrayAdapter<Artist> for artist_search_result ListView.
- *
+ * ArtistsAdapter is a specialized ArrayAdapter<Artist> for artist_search_result ListView.
+ * <p/>
  * Inspired by
- *   - https://github.com/codepath/android_guides/wiki/Using-an-ArrayAdapter-with-ListView
- *   - http://ocddevelopers.com/2014/extend-baseadapter-instead-of-arrayadapter-for-custom-list-items/
- *   - http://developer.android.com/training/improving-layouts/smooth-scrolling.html
+ * - https://github.com/codepath/android_guides/wiki/Using-an-ArrayAdapter-with-ListView
+ * - http://ocddevelopers.com/2014/extend-baseadapter-instead-of-arrayadapter-for-custom-list-items/
+ * - http://developer.android.com/training/improving-layouts/smooth-scrolling.html
  */
 public class ArtistsAdapter extends ArrayAdapter<Artist> {
 
