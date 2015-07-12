@@ -14,7 +14,8 @@ import kaaes.spotify.webapi.android.models.Image;
 public class ImageUtils {
 
     /**
-     * Returns the image with the closest dimensions to the targetSize from a list of images.
+     * Returns the image which has the closest dimentions to the target size out of a list
+     * of images.
      * <p/>
      * A heuristic approach is used to determine the image which the closest dimensions.
      * One assumption is that the width / height ratio of the images are very small (image
@@ -25,15 +26,14 @@ public class ImageUtils {
      *                   return the image with the closes size
      */
     public static Image findImageWithClosestSize(List<Image> images, int targetSize) {
-
-
         Image closestImage = null;
         int closestDeltaSize = Integer.MAX_VALUE;
 
         for (Image image : images) {
 
-            // Get a number we can use to compare to targetSize. It is kind a arbitrary
-            // to use the minimum of the image rect.
+            // Use the minimum of the image's height and width to compare with the target size.
+            // That way we can be sure that the image we choose does not need to be scaled up
+            // to be displayed which can look ugly on high resolution displays.
             int size = Math.min(image.height, image.width);
             int deltaToTargetSize = Math.abs(targetSize - size);
 

@@ -20,7 +20,7 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TrackBuilder {
 
-    private static int VIGNETTE_SIZE = 640;
+    private static int VIGNETTE_SIZE = 640; // will be used in stage 2
 
     private int mThumbnailSize;
 
@@ -29,15 +29,20 @@ public class TrackBuilder {
         mThumbnailSize = (int) context.getResources().getDimension(R.dimen.thumbnail_size);
     }
 
+    /**
+     * Converts a Spotify Track model object to our own parcelable object. As thumbnail
+     * it finds the image with the closest dimension to the thumbnail size used in the
+     * corresponding ListView.
+     */
     public MyTrack fromSpotifyTrack(Track spotifyTrack) {
 
-        // Choose an image that is as close as possible to the target dimensions it is going
-        // to be displayed (in order to reduce download size).
-
-        Image thumbnail = ImageUtils.findImageWithClosestSize(spotifyTrack.album.images, mThumbnailSize);
+        // Choose the image from the list of album images provided by spotify which comes closest
+        // to the thumbnail size used in the corresponding ListView. This optimizes the download
+        // size of the image.
+        Image thumbnail =
+                ImageUtils.findImageWithClosestSize(spotifyTrack.album.images, mThumbnailSize);
 
         String thumbnailUrl = null;
-
         if (thumbnail != null) {
             thumbnailUrl = thumbnail.url;
         }
@@ -50,6 +55,7 @@ public class TrackBuilder {
                 spotifyTrack.preview_url);
     }
 
+    /** Converts a List with spotify Tracks to a list with our own parcelable Track objects */
     public ArrayList<MyTrack> fromSpotifyTracks(List<Track> spotifyTracks) {
 
         ArrayList<MyTrack> tracks = new ArrayList<>();

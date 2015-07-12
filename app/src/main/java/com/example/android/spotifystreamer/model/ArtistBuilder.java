@@ -26,14 +26,19 @@ public class ArtistBuilder {
         mThumbnailSize = (int) context.getResources().getDimension(R.dimen.thumbnail_size);
     }
 
+    /**
+     * Converts a Spotify Artist model object to our own parcelable object. As thumbnail
+     * it finds the image with the closest dimension to the thumbnail size used in the
+     * corresponding ListView.
+     */
     public Artist fromSpotifyArtist(kaaes.spotify.webapi.android.models.Artist spotifyArtist) {
 
-        // Choose an image that is as close as possible to the target dimensions it is going
-        // to be displayed (in order to reduce download size).
+        // Choose the image from the list of album images provided by spotify which comes closest
+        // to the thumbnail size used in the corresponding ListView. This optimizes the download
+        // size of the image.
         Image thumbnail = ImageUtils.findImageWithClosestSize(spotifyArtist.images, mThumbnailSize);
 
         String thumbnailUrl = null;
-
         if (thumbnail != null) {
             thumbnailUrl = thumbnail.url;
         }
@@ -41,6 +46,7 @@ public class ArtistBuilder {
         return new Artist(spotifyArtist.id, spotifyArtist.name, thumbnailUrl);
     }
 
+    /** Converts a List with spotify Tracks to a list with our own parcelable Track objects */
     public ArrayList<Artist> fromSpotifyArtists(
             List<kaaes.spotify.webapi.android.models.Artist> spotifyArtists) {
 
