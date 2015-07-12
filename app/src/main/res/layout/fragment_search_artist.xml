@@ -16,7 +16,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/search_artist_editText"
         android:inputType="textFilter"
-        android:imeOptions="actionSearch"/>
+        android:imeOptions="actionSearch"
+        android:hint="@string/artist_search_field_hint"/>
     <ListView
         android:id="@+id/list_view_artist_search"
         android:layout_width="match_parent"

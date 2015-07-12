@@ -5,4 +5,5 @@
     <string name="no_artist_found">No artist found. Refine your search.</string>
     <string name="no_tracks_found">No tracks found</string>
     <string name="loading_text">Loading...</string>
+    <string name="artist_search_field_hint">Search by artist</string>
 </resources>
