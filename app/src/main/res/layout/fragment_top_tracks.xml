@@ -12,14 +12,4 @@
         android:id="@+id/list_view_top_tracks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/no_artist_found"
-        android:textAppearance="?android:textAppearanceSearchResultSubtitle"
-        android:gravity="center"
-        android:visibility="gone"
-        android:id="@+id/no_tracks_textView"/>
-
 </FrameLayout>
