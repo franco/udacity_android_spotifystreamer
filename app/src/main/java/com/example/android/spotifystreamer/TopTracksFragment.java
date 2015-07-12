@@ -2,7 +2,6 @@ package com.example.android.spotifystreamer;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,10 +16,10 @@ import com.example.android.spotifystreamer.adapter.TopTracksAdapter;
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
 import com.example.android.spotifystreamer.model.TrackBuilder;
+import com.example.android.spotifystreamer.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -99,7 +98,7 @@ public class TopTracksFragment extends Fragment {
 
             // TODO try ... catch for error handling NullPointerException, etc...
             Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
+            options.put(SpotifyService.COUNTRY, Utils.getDefaultCountry());
             Tracks tracks = service.getArtistTopTrack(params[0], options);
 
             return mTrackBuilder.fromSpotifyTracks(tracks.tracks);
