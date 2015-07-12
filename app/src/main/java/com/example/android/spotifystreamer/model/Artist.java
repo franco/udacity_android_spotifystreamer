@@ -4,14 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Parcelable POJO representing an Artist.
+ * Parcelable POJO representing an artist.
  */
 public class Artist implements Parcelable {
     public String id;
     public String name;
     public String thumbnailUrl;
 
-    // Constructor
     public Artist(String id, String name, String thumbnailUrl){
         this.id = id;
         this.name = name;

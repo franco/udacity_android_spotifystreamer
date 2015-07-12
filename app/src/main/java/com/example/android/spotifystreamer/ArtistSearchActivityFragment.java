@@ -68,7 +68,7 @@ public class ArtistSearchActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Artist artist = mArtistsAdapter.getItem(i);
                 Intent intent = new Intent(getActivity(), TopTracksActivity.class);
-                intent.putExtra(Intent.EXTRA_TEXT, artist.id);
+                intent.putExtra(TopTracksActivityFragment.EXTRA_ARTIST, artist);
                 startActivity(intent);
             }
         });

@@ -11,7 +11,7 @@ import java.util.List;
 import kaaes.spotify.webapi.android.models.Image;
 
 /**
- * Builder class to create Artist model object from Spotify Artist.
+ * Builder class to create MyArtist model object from Spotify Artist.
  */
 public class ArtistBuilder {
 

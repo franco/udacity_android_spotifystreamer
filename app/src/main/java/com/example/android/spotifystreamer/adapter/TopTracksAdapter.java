@@ -9,26 +9,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.spotifystreamer.R;
-import com.example.android.spotifystreamer.model.Artist;
+import com.example.android.spotifystreamer.model.MyTrack;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-
 /**
- * Class ArtistsAdapter is a specialized ArrayAdapter<Artist> for artist_search_result ListView.
- *
- * Inspired by
- *   - https://github.com/codepath/android_guides/wiki/Using-an-ArrayAdapter-with-ListView
- *   - http://ocddevelopers.com/2014/extend-baseadapter-instead-of-arrayadapter-for-custom-list-items/
- *   - http://developer.android.com/training/improving-layouts/smooth-scrolling.html
+ * TracksAdapter is a specialized ArrayAdapter<MyTrack> for top_tracks ListView.
  */
-public class ArtistsAdapter extends ArrayAdapter<Artist> {
+public class TopTracksAdapter extends ArrayAdapter<MyTrack> {
 
     private int mThumbnailSize;
 
-    public ArtistsAdapter(Context context, List<Artist> artists) {
-        super(context, 0, artists);
+    public TopTracksAdapter(Context context, List<MyTrack> tracks) {
+        super(context, 0, tracks);
 
         // thumbnail_size in pixels (getDimension converts dp to px)
         mThumbnailSize = (int) getContext().getResources().getDimension(R.dimen.thumbnail_size);
@@ -42,7 +36,7 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             view = LayoutInflater.from(getContext()).inflate(
-                    R.layout.list_item_artist_search_result,
+                    R.layout.list_item_track,
                     parent,
                     false);
 
@@ -50,7 +44,8 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
             // http://developer.android.com/training/improving-layouts/smooth-scrolling.html
             holder = new ViewHolder();
             holder.thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-            holder.name = (TextView) view.findViewById(R.id.artist_textView);
+            holder.album = (TextView) view.findViewById(R.id.album_textView);
+            holder.track = (TextView) view.findViewById(R.id.track_textView);
             view.setTag(holder);
         } else {
             view = convertView;
@@ -58,13 +53,14 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
         }
 
         // Get the data item for this position
-        Artist artist = getItem(position);
+        MyTrack track = getItem(position);
 
         // Populate data
-        holder.name.setText(artist.name);
+        holder.album.setText(track.albumName);
+        holder.track.setText(track.trackName);
 
-        if (artist.hasThumbnailUrl()) {
-            Picasso.with(getContext()).load(artist.thumbnailUrl)
+        if (track.hasThumbnailUrl()) {
+            Picasso.with(getContext()).load(track.thumbnailUrl)
                     .resize(mThumbnailSize, mThumbnailSize)
                     .centerInside()
                     .into(holder.thumbnail);
@@ -75,6 +71,7 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
 
     private static class ViewHolder {
         public ImageView thumbnail;
-        public TextView name;
+        public TextView album;
+        public TextView track;
     }
 }
