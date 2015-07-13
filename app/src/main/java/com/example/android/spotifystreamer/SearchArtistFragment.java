@@ -154,7 +154,7 @@ public class SearchArtistFragment extends Fragment {
                             getActivity(), R.string.no_artist_found, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(getActivity(), R.string.spotify_error, Toast.LENGTH_SHORT).show();
+                Utils.showAlertDialog(getActivity(), R.string.spotify_error);
             }
         }
 
@@ -175,7 +175,7 @@ public class SearchArtistFragment extends Fragment {
                     }
                 });
             } else {
-                Toast.makeText(getActivity(), R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                Utils.showAlertDialog(getActivity(), R.string.no_network_error);
                 cancel(true);
             }
         }

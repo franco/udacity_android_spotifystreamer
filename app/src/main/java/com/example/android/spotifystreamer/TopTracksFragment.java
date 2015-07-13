@@ -129,7 +129,7 @@ public class TopTracksFragment extends Fragment {
                     Toast.makeText(getActivity(), R.string.no_tracks_found, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(getActivity(), R.string.spotify_error, Toast.LENGTH_SHORT).show();
+                Utils.showAlertDialog(getActivity(), R.string.spotify_error);
             }
         }
 
@@ -142,7 +142,7 @@ public class TopTracksFragment extends Fragment {
                         true,
                         false);
             } else {
-                Toast.makeText(getActivity(), R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                Utils.showAlertDialog(getActivity(), R.string.no_network_error);
                 cancel(true);
             }
         }

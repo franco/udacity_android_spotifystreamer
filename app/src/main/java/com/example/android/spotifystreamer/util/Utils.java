@@ -4,9 +4,13 @@
 
 package com.example.android.spotifystreamer.util;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import com.example.android.spotifystreamer.R;
 
 import java.util.Locale;
 
@@ -14,8 +18,6 @@ import java.util.Locale;
  * Utility class.
  */
 public class Utils {
-
-    private static boolean sNetworkAvailable;
 
     public static String getDefaultCountry() {
         String country = Locale.getDefault().getCountry();
@@ -36,5 +38,25 @@ public class Utils {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /** Displays an alert dialog */
+    public static void showAlertDialog(Context context, String message) {
+        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle(R.string.error_title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL,
+                context.getResources().getString(R.string.neutral_button_label),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    public static void showAlertDialog(Context context, int messageId) {
+        showAlertDialog(context, context.getResources().getString(messageId));
     }
 }

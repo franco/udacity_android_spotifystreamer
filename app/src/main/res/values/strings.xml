@@ -12,4 +12,7 @@
     <string name="artist_search_field_hint">Search by artist</string>
     <string name="no_network_error">No network!</string>
     <string name="spotify_error">There was an error fetching data from spotify. Try again later.</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="neutral_button_label">OK</string>
+
 </resources>
