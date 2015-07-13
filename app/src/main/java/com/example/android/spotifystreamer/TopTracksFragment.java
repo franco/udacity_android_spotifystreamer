@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,15 @@ import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class TopTracksFragment extends Fragment {
+
+    private static final String LOG_TAG = TopTracksFragment.class.getSimpleName();
 
     public static final String EXTRA_ARTIST = "artist";
     private static final String STATE_ARTIST = "state_artist";
@@ -97,42 +101,57 @@ public class TopTracksFragment extends Fragment {
 
         @Override
         protected ArrayList<MyTrack> doInBackground(String... params) {
+            try {
+                // Query Spotify server
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
 
-            // Query Spotify server
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
+                Map<String, Object> options = new HashMap<>();
+                options.put(SpotifyService.COUNTRY, Utils.getDefaultCountry());
+                Tracks tracks = service.getArtistTopTrack(params[0], options);
 
-            Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, Utils.getDefaultCountry());
-            Tracks tracks = service.getArtistTopTrack(params[0], options);
-
-            return mTrackBuilder.fromSpotifyTracks(tracks.tracks);
+                return mTrackBuilder.fromSpotifyTracks(tracks.tracks);
+            } catch (RetrofitError re) {
+                Log.e(LOG_TAG, re.getMessage());
+                return null;
+            }
         }
 
         @Override
         protected void onPostExecute(ArrayList<MyTrack> topTracks) {
-            mTopTracks = topTracks;
-            mTopTracksAdapter.clear();
-            mTopTracksAdapter.addAll(topTracks);
+            if (topTracks != null) {
+                mTopTracks = topTracks;
+                mTopTracksAdapter.clear();
+                mTopTracksAdapter.addAll(topTracks);
 
-            mProgressDialog.dismiss();
-            if (topTracks.size() < 1) {
-                Toast.makeText(getActivity(), R.string.no_tracks_found, Toast.LENGTH_SHORT).show();
+                mProgressDialog.dismiss();
+                if (topTracks.size() < 1) {
+                    Toast.makeText(getActivity(), R.string.no_tracks_found, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getActivity(), R.string.spotify_error, Toast.LENGTH_SHORT).show();
             }
         }
 
         @Override
         protected void onPreExecute() {
-            mProgressDialog = ProgressDialog.show(getActivity(),
-                    null,
-                    getResources().getString(R.string.loading_text),
-                    true,
-                    false);
+            if (Utils.isNetworkAvailable(getActivity())) {
+                mProgressDialog = ProgressDialog.show(getActivity(),
+                        null,
+                        getResources().getString(R.string.loading_text),
+                        true,
+                        false);
+            } else {
+                Toast.makeText(getActivity(), R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                cancel(true);
+            }
         }
 
         @Override
         protected void onCancelled(ArrayList<MyTrack> topTracks) {
-            mProgressDialog.dismiss();
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+            }
         }
     }
 }

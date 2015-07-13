@@ -10,4 +10,6 @@
     <string name="no_tracks_found">No tracks found</string>
     <string name="loading_text">Loading...</string>
     <string name="artist_search_field_hint">Search by artist</string>
+    <string name="no_network_error">No network!</string>
+    <string name="spotify_error">There was an error fetching data from spotify. Try again later.</string>
 </resources>

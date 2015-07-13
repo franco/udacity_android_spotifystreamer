@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,12 +27,14 @@ import android.widget.Toast;
 import com.example.android.spotifystreamer.adapter.ArtistsAdapter;
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.ArtistBuilder;
+import com.example.android.spotifystreamer.util.Utils;
 
 import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.RetrofitError;
 
 
 /**
@@ -39,6 +42,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class SearchArtistFragment extends Fragment {
 
+    private static final String LOG_TAG = SearchArtistFragment.class.getSimpleName();
     private static final String STATE_ARTISTS = "state_artists";
 
     ArrayList<Artist> mArtists;
@@ -123,48 +127,64 @@ public class SearchArtistFragment extends Fragment {
 
         @Override
         protected ArrayList<Artist> doInBackground(String... params) {
+            try {
+                // Query Spotify server
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
 
-            // Query Spotify server
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
+                ArtistsPager results = service.searchArtists(params[0]);
+                return mArtistBuilder.fromSpotifyArtists(results.artists.items);
 
-            ArtistsPager results = service.searchArtists(params[0]);
-
-            return mArtistBuilder.fromSpotifyArtists(results.artists.items);
+            } catch (RetrofitError re) {
+                Log.e(LOG_TAG, re.getMessage());
+                return null;
+            }
         }
 
         @Override
         protected void onPostExecute(ArrayList<Artist> artists) {
-            mArtists = artists;
-            mArtistsAdapter.clear();
-            mArtistsAdapter.addAll(mArtists);
+            if (artists != null) {
+                mArtists = artists;
+                mArtistsAdapter.clear();
+                mArtistsAdapter.addAll(mArtists);
 
-            mProgressDialog.dismiss();
-            if (artists.size() < 1) {
-                Toast.makeText(getActivity(), R.string.no_artist_found, Toast.LENGTH_SHORT).show();
+                mProgressDialog.dismiss();
+                if (artists.size() < 1) {
+                    Toast.makeText(
+                            getActivity(), R.string.no_artist_found, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getActivity(), R.string.spotify_error, Toast.LENGTH_SHORT).show();
             }
         }
 
         @Override
         protected void onPreExecute() {
-            mProgressDialog = ProgressDialog.show(getActivity(),
-                    null,
-                    getResources().getString(R.string.loading_text),
-                    true,
-                    true);
+            if (Utils.isNetworkAvailable(getActivity())) {
+                mProgressDialog = ProgressDialog.show(getActivity(),
+                        null,
+                        getResources().getString(R.string.loading_text),
+                        true,
+                        true);
 
-            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    cancel(true);
-                    mProgressDialog.cancel();
-                }
-            });
+                mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        cancel(true);
+                        mProgressDialog.cancel();
+                    }
+                });
+            } else {
+                Toast.makeText(getActivity(), R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                cancel(true);
+            }
         }
 
         @Override
         protected void onCancelled(ArrayList<Artist> artists) {
-            mProgressDialog.dismiss();
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+            }
         }
     }
 }
