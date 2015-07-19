@@ -20,8 +20,6 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TrackBuilder {
 
-    private static int VIGNETTE_SIZE = 640; // will be used in stage 2
-
     private int mThumbnailSize;
 
     public TrackBuilder(Context context) {
@@ -41,17 +39,27 @@ public class TrackBuilder {
         // size of the image.
         Image thumbnail =
                 ImageUtils.findImageWithClosestSize(spotifyTrack.album.images, mThumbnailSize);
-
         String thumbnailUrl = null;
         if (thumbnail != null) {
             thumbnailUrl = thumbnail.url;
+        }
+
+        // Choose the image from the list of album images which is closest to the artwork size
+        // This optimizes the download size of the image.
+
+        Image artwork =
+                ImageUtils.findImageWithClosestSize(spotifyTrack.album.images, MyTrack.ARTWORK_SIZE);
+
+        String artworkUrl = null;
+        if (artwork != null) {
+            artworkUrl = artwork.url;
         }
 
         return new MyTrack(
                 spotifyTrack.name,
                 spotifyTrack.album.name,
                 thumbnailUrl,
-                null,
+                artworkUrl,
                 spotifyTrack.preview_url);
     }
 

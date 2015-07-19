@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -79,6 +80,16 @@ public class TopTracksFragment extends Fragment {
         // Get a reference to the ListView, and attach the adapter
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_top_tracks);
         listView.setAdapter(mTopTracksAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MyTrack track = mTopTracksAdapter.getItem(i);
+                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                intent.putExtra(PlayerFragment.EXTRA_TRACK, track);
+                intent.putExtra(PlayerFragment.EXTRA_ARTIST, mArtist);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }

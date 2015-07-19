@@ -14,5 +14,6 @@
     <string name="spotify_error">There was an error fetching data from spotify. Try again later.</string>
     <string name="error_title">Something went wrong</string>
     <string name="neutral_button_label">OK</string>
+    <string name="title_activity_player">PlayerActivity</string>
 
 </resources>

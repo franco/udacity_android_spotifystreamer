@@ -12,18 +12,20 @@ import android.os.Parcelable;
  */
 public class MyTrack implements Parcelable {
 
+    public static final int ARTWORK_SIZE = 640;
+
     public String trackName;
     public String albumName;
     public String thumbnailUrl;
-    public String vignettelUrl;
+    public String artworkUrl;
     public String previewUrl;
 
-    public MyTrack(String trackName, String albumName, String thumbnailUrl, String vignettelUrl,
+    public MyTrack(String trackName, String albumName, String thumbnailUrl, String artworklUrl,
                    String previewUrl) {
         this.trackName = trackName;
         this.albumName = albumName;
         this.thumbnailUrl = thumbnailUrl;
-        this.vignettelUrl = vignettelUrl;
+        this.artworkUrl = artworklUrl;
         this.previewUrl = previewUrl;
     }
 
@@ -31,7 +33,7 @@ public class MyTrack implements Parcelable {
         this.trackName = in.readString();
         this.albumName = in.readString();
         this.thumbnailUrl = in.readString();
-        this.vignettelUrl = in.readString();
+        this.artworkUrl = in.readString();
         this.previewUrl = in.readString();
     }
 
@@ -45,7 +47,7 @@ public class MyTrack implements Parcelable {
         parcel.writeString(trackName);
         parcel.writeString(albumName);
         parcel.writeString(thumbnailUrl);
-        parcel.writeString(vignettelUrl);
+        parcel.writeString(artworkUrl);
         parcel.writeString(previewUrl);
     }
 
@@ -61,6 +63,10 @@ public class MyTrack implements Parcelable {
 
     public boolean hasThumbnailUrl() {
         return thumbnailUrl != null;
+    }
+
+    public boolean hasArtworkUrl() {
+        return artworkUrl != null;
     }
 
 }
