@@ -83,10 +83,10 @@ public class TopTracksFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                MyTrack track = mTopTracksAdapter.getItem(i);
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra(PlayerFragment.EXTRA_TRACK, track);
+                intent.putExtra(PlayerFragment.EXTRA_TRACKS, mTopTracks);
                 intent.putExtra(PlayerFragment.EXTRA_ARTIST, mArtist);
+                intent.putExtra(PlayerFragment.EXTRA_CURRENT_TRACK_POSITION, i);
                 startActivity(intent);
             }
         });

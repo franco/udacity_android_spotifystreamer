@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import com.example.android.spotifystreamer.R;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class.
@@ -58,5 +59,18 @@ public class Utils {
 
     public static void showAlertDialog(Context context, int messageId) {
         showAlertDialog(context, context.getResources().getString(messageId));
+    }
+
+    /**
+     * Returns a formatted time string (m:ss).
+     *
+     * Copied from http://stackoverflow.com/a/625624
+     */
+    public static String formatScrubBarTime(int duration_in_ms) {
+        return String.format("%d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(duration_in_ms),
+                TimeUnit.MILLISECONDS.toSeconds(duration_in_ms) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration_in_ms))
+        );
     }
 }

@@ -13,6 +13,7 @@ import android.os.Parcelable;
 public class MyTrack implements Parcelable {
 
     public static final int ARTWORK_SIZE = 640;
+    public static final int PREVIEW_DURATION = 30000; // in ms
 
     public String trackName;
     public String albumName;
