@@ -7,7 +7,6 @@ package com.example.android.spotifystreamer;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -44,9 +43,19 @@ public class SearchArtistFragment extends Fragment {
 
     private static final String LOG_TAG = SearchArtistFragment.class.getSimpleName();
     private static final String STATE_ARTISTS = "state_artists";
+    private static final String SELECTED_KEY = "selected_position";
 
-    ArrayList<Artist> mArtists;
-    ArtistsAdapter mArtistsAdapter;
+    private ArrayList<Artist> mArtists;
+    private ArtistsAdapter mArtistsAdapter;
+    private ListView mListView;
+    private int mPosition = ListView.INVALID_POSITION;
+
+
+    public interface Callback {
+        /** Callback for when an item has been selected. */
+        void onItemSelected(Artist artist);
+    }
+
 
     public SearchArtistFragment() {
     }
@@ -65,15 +74,15 @@ public class SearchArtistFragment extends Fragment {
         mArtistsAdapter = new ArtistsAdapter(getActivity(), mArtists);
 
         // Get a reference to the ListView, attach the adapter, and set onItemClickListener
-        ListView listView = (ListView) rootView.findViewById(R.id.list_view_artist_search);
-        listView.setAdapter(mArtistsAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView = (ListView) rootView.findViewById(R.id.list_view_artist_search);
+        mListView.setAdapter(mArtistsAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Artist artist = mArtistsAdapter.getItem(i);
-                Intent intent = new Intent(getActivity(), TopTracksActivity.class);
-                intent.putExtra(TopTracksFragment.EXTRA_ARTIST, artist);
-                startActivity(intent);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Artist artist = mArtistsAdapter.getItem(position);
+                ((Callback) getActivity())
+                        .onItemSelected(artist);
+                mPosition = position;
             }
         });
 
@@ -106,6 +115,12 @@ public class SearchArtistFragment extends Fragment {
             }
         });
 
+        // Restore scroll position
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            mListView.setSelection(mPosition);
+        }
+
         return rootView;
     }
 
@@ -113,13 +128,15 @@ public class SearchArtistFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(STATE_ARTISTS, mArtists);
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
     }
 
     private class SearchArtistTask extends AsyncTask<String, Void, ArrayList<Artist>> {
 
         private ArtistBuilder mArtistBuilder;
         private ProgressDialog mProgressDialog;
-
 
         public SearchArtistTask(Context context) {
             mArtistBuilder = new ArtistBuilder(context);

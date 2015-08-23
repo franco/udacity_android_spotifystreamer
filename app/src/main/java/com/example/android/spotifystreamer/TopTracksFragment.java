@@ -36,7 +36,7 @@ import retrofit.RetrofitError;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment for diplaying artist's top tracks.
  */
 public class TopTracksFragment extends Fragment {
 
@@ -45,7 +45,6 @@ public class TopTracksFragment extends Fragment {
     public static final String EXTRA_ARTIST = "artist";
     private static final String STATE_ARTIST = "state_artist";
     private static final String STATE_TRACKS = "state_tracks";
-
 
     private Artist mArtist;
     private ArrayList<MyTrack> mTopTracks;
@@ -63,10 +62,9 @@ public class TopTracksFragment extends Fragment {
             mArtist = savedInstanceState.getParcelable(STATE_ARTIST);
             mTopTracks = savedInstanceState.getParcelableArrayList(STATE_TRACKS);
         } else {
-            // Extract intent extra
-            Intent intent = getActivity().getIntent();
-            if (intent != null && intent.hasExtra(EXTRA_ARTIST)) {
-                mArtist = intent.getParcelableExtra(EXTRA_ARTIST);
+            Bundle arguments = getArguments();
+            if (arguments != null) {
+                mArtist = arguments.getParcelable(TopTracksFragment.EXTRA_ARTIST);
                 new SearchTrackTask(getActivity()).execute(mArtist.id);
             }
             mTopTracks = new ArrayList<>();
@@ -74,8 +72,10 @@ public class TopTracksFragment extends Fragment {
 
         mTopTracksAdapter = new TopTracksAdapter(getActivity(), mTopTracks);
 
-        // Set action bar subtitle
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
+        if (mArtist != null) {
+            // Set action bar subtitle
+            ((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
+        }
 
         // Get a reference to the ListView, and attach the adapter
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_top_tracks);

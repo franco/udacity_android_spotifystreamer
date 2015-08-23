@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 Franco Sebregondi.
+  -->
+
+<resources>
+    <style name="SpotifyListStyle">
+        <item name="android:choiceMode">singleChoice</item>
+    </style>
+</resources>
