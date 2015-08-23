@@ -24,6 +24,7 @@
         <activity
             android:name=".TopTracksActivity"
             android:label="@string/title_activity_top_tracks"
+            android:launchMode="singleTop"
             android:parentActivityName=".SearchArtistActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
