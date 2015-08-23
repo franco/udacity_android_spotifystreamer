@@ -6,7 +6,6 @@ package com.example.android.spotifystreamer;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -50,6 +49,11 @@ public class TopTracksFragment extends Fragment {
     private ArrayList<MyTrack> mTopTracks;
     private TopTracksAdapter mTopTracksAdapter;
 
+    public interface TrackSelectedCallback {
+        /** Callback for when an item has been selected. */
+        void onTrackSelected(Artist artist, ArrayList<MyTrack> tracks, int position);
+    }
+
     public TopTracksFragment() {
     }
 
@@ -82,12 +86,9 @@ public class TopTracksFragment extends Fragment {
         listView.setAdapter(mTopTracksAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra(PlayerFragment.EXTRA_TRACKS, mTopTracks);
-                intent.putExtra(PlayerFragment.EXTRA_ARTIST, mArtist);
-                intent.putExtra(PlayerFragment.EXTRA_CURRENT_TRACK_POSITION, i);
-                startActivity(intent);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                ((TrackSelectedCallback) getActivity())
+                        .onTrackSelected(mArtist, mTopTracks, position);
             }
         });
 

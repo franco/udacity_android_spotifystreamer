@@ -4,6 +4,7 @@
 
 package com.example.android.spotifystreamer;
 
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,12 +12,14 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,9 +38,9 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * DialogFragment that holds the player.
  */
-public class PlayerFragment extends Fragment {
+public class PlayerFragment extends DialogFragment {
 
     private static final String LOG_TAG = PlayerFragment.class.getSimpleName();
 
@@ -88,14 +91,11 @@ public class PlayerFragment extends Fragment {
             mTracks = savedInstanceState.getParcelableArrayList(STATE_TRACKS);
             mTrackPosition = savedInstanceState.getInt(STATE_POSITION);
         } else {
-
-            // Extract intent extra
-            Intent intent = getActivity().getIntent();
-            if (intent != null && intent.hasExtra(EXTRA_ARTIST) && intent.hasExtra(EXTRA_TRACKS)
-                    && intent.hasExtra(EXTRA_CURRENT_TRACK_POSITION)) {
-                mArtist = intent.getParcelableExtra(EXTRA_ARTIST);
-                mTracks = intent.getParcelableArrayListExtra(EXTRA_TRACKS);
-                mTrackPosition = intent.getIntExtra(EXTRA_CURRENT_TRACK_POSITION, 0);
+            Bundle arguments = getArguments();
+            if (arguments != null) {
+                mArtist = arguments.getParcelable(PlayerFragment.EXTRA_ARTIST);
+                mTracks = arguments.getParcelableArrayList(PlayerFragment.EXTRA_TRACKS);
+                mTrackPosition = arguments.getInt(PlayerFragment.EXTRA_CURRENT_TRACK_POSITION);
             }
         }
 
@@ -174,6 +174,14 @@ public class PlayerFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    /** The system calls this only when creating the layout in a dialog. */
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
     }
 
     @Override

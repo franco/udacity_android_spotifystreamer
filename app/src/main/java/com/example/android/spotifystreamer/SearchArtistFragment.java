@@ -56,7 +56,6 @@ public class SearchArtistFragment extends Fragment {
         void onItemSelected(Artist artist);
     }
 
-
     public SearchArtistFragment() {
     }
 

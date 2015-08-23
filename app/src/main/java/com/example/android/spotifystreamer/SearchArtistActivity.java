@@ -9,11 +9,16 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
 import com.example.android.spotifystreamer.model.Artist;
+import com.example.android.spotifystreamer.model.MyTrack;
+
+import java.util.ArrayList;
 
 public class SearchArtistActivity extends ActionBarActivity
-        implements SearchArtistFragment.Callback {
+        implements SearchArtistFragment.Callback, TopTracksFragment.TrackSelectedCallback {
 
     public static final String TOPTRACKSFRAGMENT_TAG = "TTFAG";
+    public static final String PLAYERFRAGMENT_TAG = "PFAG";
+
     private boolean mTwoPane;
 
     @Override
@@ -52,6 +57,17 @@ public class SearchArtistActivity extends ActionBarActivity
                     .putExtra(TopTracksFragment.EXTRA_ARTIST, artist);
             startActivity(intent);
         }
+    }
 
+    @Override
+    public void onTrackSelected(Artist artist, ArrayList<MyTrack> tracks, int position) {
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(PlayerFragment.EXTRA_TRACKS, tracks);
+        args.putParcelable(PlayerFragment.EXTRA_ARTIST, artist);
+        args.putInt(PlayerFragment.EXTRA_CURRENT_TRACK_POSITION, position);
+
+        PlayerFragment fragment = new PlayerFragment();
+        fragment.setArguments(args);
+        fragment.show(getSupportFragmentManager(), PLAYERFRAGMENT_TAG);
     }
 }
