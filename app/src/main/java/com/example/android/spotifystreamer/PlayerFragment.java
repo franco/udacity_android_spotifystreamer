@@ -81,16 +81,22 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // Listen to PlayerService broadcast notifications
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(PlayerService.MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION);
+        filter.addAction(PlayerService.MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION);
+        filter.addAction(PlayerService.MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION);
+        filter.addAction(PlayerService.MUSIC_PLAYER_PREPARING_NOTIFICATION);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                mOnMusicPlayerChangedNotification,
-                new IntentFilter(PlayerService.MUSIC_PLAYER_NOTIFICATION));
+                mOnMusicPlayerNotification, filter);
     }
 
     @Override
     public void onPause() {
-        // Unregister since the activity is about to be closed.
+        // Unregister since the fragment is about to be closed.
         LocalBroadcastManager.getInstance(getActivity())
-                .unregisterReceiver(mOnMusicPlayerChangedNotification);
+                .unregisterReceiver(mOnMusicPlayerNotification);
         super.onPause();
     }
 
@@ -104,52 +110,44 @@ public class PlayerFragment extends DialogFragment {
             mArtist = savedInstanceState.getParcelable(STATE_ARTIST);
             mTracks = savedInstanceState.getParcelableArrayList(STATE_TRACKS);
             mTrackPosition = savedInstanceState.getInt(STATE_POSITION);
+            propagateDataToView();
         } else {
             Bundle arguments = getArguments();
             if (arguments != null) {
                 mArtist = arguments.getParcelable(PlayerFragment.EXTRA_ARTIST);
                 mTracks = arguments.getParcelableArrayList(PlayerFragment.EXTRA_TRACKS);
                 mTrackPosition = arguments.getInt(PlayerFragment.EXTRA_CURRENT_TRACK_POSITION);
+                if (mArtist != null) {
+                    propagateDataToView();
+                }
             }
         }
 
-        propagateDataToView();
-
-        mControls.playButton = (ImageButton) rootView.findViewById(R.id.play_button);
+        mControls.bindToView(rootView);
         mControls.playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startPlaying();
             }
         });
-
-        mControls.nextButton = (ImageButton) rootView.findViewById(R.id.next_button);
         mControls.nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mPlayerService.playNextSong();
             }
         });
-
-        mControls.prevButton = (ImageButton) rootView.findViewById(R.id.prev_button);
         mControls.prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mPlayerService.playPrevSong();
             }
         });
-
-        mControls.pauseButton = (ImageButton) rootView.findViewById(R.id.pause_button);
         mControls.pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 pausePlaying();
             }
         });
-
-        final TextView currentPos = (TextView) rootView.findViewById(R.id.track_current_position);
-
-        mControls.scrubBar = (SeekBar) rootView.findViewById(R.id.seekBar);
         mControls.scrubBar.setMax(MyTrack.PREVIEW_DURATION);
         mControls.scrubBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -157,8 +155,9 @@ public class PlayerFragment extends DialogFragment {
                 if (fromUser) {
                     mPlayerService.seekTo(progress);
                 }
-                currentPos.setText(Utils.formatScrubBarTime(progress));
+                mControls.currentPositionTextView.setText(Utils.formatScrubBarTime(progress));
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 // pause music while scrubbing
@@ -232,9 +231,22 @@ public class PlayerFragment extends DialogFragment {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) iBinder;
             mPlayerService = binder.getService();
-
-            mPlayerService.playTracks(mTracks, mTrackPosition);
             isPlayerBound = true;
+
+            if (mTracks == null) {
+                // Apparently fragment was initialized without data. Initialize fragment with
+                // data from running service.
+
+                if (mPlayerService.isPlaying()) {
+                    mTracks = mPlayerService.getSongs();
+                    mArtist = mPlayerService.getArtist();
+                    mTrackPosition = mPlayerService.getCurrentPosition();
+                    propagateDataToView();
+                }
+            } else {
+                mPlayerService.playTracks(mTracks, mTrackPosition, mArtist);
+            }
+
 
             if (mPlayerService.isPlaying()) {
                 mControls.registerProgressBarUpdate();
@@ -248,27 +260,29 @@ public class PlayerFragment extends DialogFragment {
         }
     };
 
-    private BroadcastReceiver mOnMusicPlayerChangedNotification = new BroadcastReceiver() {
+    private BroadcastReceiver mOnMusicPlayerNotification = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra(PlayerService.MUSIC_PLAYER_NOTIFICATION_EXTRA);
 
-            switch (message) {
-                case PlayerService.MUSIC_PLAYER_ACTION_DOWNLOADING:
+            switch(intent.getAction()) {
+                case PlayerService.MUSIC_PLAYER_PREPARING_NOTIFICATION:
                     mControls.showPauseButton();
+                    mControls.showDownloadIndicator();
+                    mControls.resetControls();
                     break;
-                case PlayerService.MUSIC_PLAYER_ACTION_PLAYING:
+                case PlayerService.MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION:
                     mControls.registerProgressBarUpdate();
                     mControls.showPauseButton();
+                    mControls.hideDownloadIndicator();
                     break;
-                case PlayerService.MUSIC_PLAYER_ACTION_STOPPED:
-                    mControls.unregisterProgressBarUpdate();
-                    mControls.showPlayButton();
-                    break;
-                case PlayerService.MUSIC_PLAYER_ACTION_SONG_CHANGED:
-                    mTrackPosition = mPlayerService.getCurrentPosition();
+                case PlayerService.MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION:
+                    mTrackPosition = intent.getIntExtra(PlayerService.SONG_POSITION_EXTRA, mTrackPosition);
                     propagateDataToView();
                     mControls.resetControls();
+                    break;
+                case PlayerService.MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION:
+                    mControls.unregisterProgressBarUpdate();
+                    mControls.showPlayButton();
                     break;
             }
         }
@@ -281,6 +295,8 @@ public class PlayerFragment extends DialogFragment {
         public ImageButton nextButton;
         public ImageButton pauseButton;
         public SeekBar scrubBar;
+        public TextView downloadIndicatorTextView;
+        public TextView currentPositionTextView;
 
         private Runnable mProgressBarUpdate = new Runnable() {
             @Override
@@ -309,7 +325,6 @@ public class PlayerFragment extends DialogFragment {
             pauseButton.setVisibility(View.VISIBLE);
         }
 
-
         public void registerProgressBarUpdate() {
             Log.d(LOG_TAG, "registerProgressBarUpdate");
             mHandler.post(mProgressBarUpdate);
@@ -318,6 +333,25 @@ public class PlayerFragment extends DialogFragment {
         public void unregisterProgressBarUpdate() {
             Log.d(LOG_TAG, "unregisterProgressBarUpdate");
             mHandler.removeCallbacks(mProgressBarUpdate);
+        }
+
+        public void showDownloadIndicator() {
+            downloadIndicatorTextView.setVisibility(View.VISIBLE);
+        }
+
+        public void hideDownloadIndicator() {
+            downloadIndicatorTextView.setVisibility(View.INVISIBLE);
+        }
+
+        public void bindToView(View view) {
+            playButton = (ImageButton) view.findViewById(R.id.play_button);
+            nextButton = (ImageButton) view.findViewById(R.id.next_button);
+            prevButton = (ImageButton) view.findViewById(R.id.prev_button);
+            pauseButton = (ImageButton) view.findViewById(R.id.pause_button);
+            scrubBar = (SeekBar) view.findViewById(R.id.seekBar);
+            currentPositionTextView = (TextView) view.findViewById(R.id.track_current_position);
+            downloadIndicatorTextView =
+                    (TextView) view.findViewById(R.id.track_downloading_indicator);
         }
     }
 }

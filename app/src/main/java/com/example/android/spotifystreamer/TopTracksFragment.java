@@ -5,10 +5,14 @@
 package com.example.android.spotifystreamer;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +26,7 @@ import com.example.android.spotifystreamer.adapter.TopTracksAdapter;
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
 import com.example.android.spotifystreamer.model.TrackBuilder;
+import com.example.android.spotifystreamer.service.PlayerService;
 import com.example.android.spotifystreamer.util.Utils;
 
 import java.util.ArrayList;
@@ -44,15 +49,32 @@ public class TopTracksFragment extends Fragment {
     public static final String EXTRA_ARTIST = "artist";
     private static final String STATE_ARTIST = "state_artist";
     private static final String STATE_TRACKS = "state_tracks";
+    private static final String SELECTED_KEY = "selected_position";
 
     private Artist mArtist;
     private ArrayList<MyTrack> mTopTracks;
     private TopTracksAdapter mTopTracksAdapter;
+    private ListView mTracksListView;
+    private int mPosition = ListView.INVALID_POSITION;
+
 
     public interface TrackSelectedCallback {
         /** Callback for when an item has been selected. */
         void onTrackSelected(Artist artist, ArrayList<MyTrack> tracks, int position);
     }
+
+    private BroadcastReceiver mOnMusicPlayerSongChanged = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int position = intent.getIntExtra(PlayerService.SONG_POSITION_EXTRA, 0);
+            Artist artist = intent.getParcelableExtra(PlayerService.ARTIST_EXTRA);
+            if (mArtist == artist) {
+                mTracksListView.setItemChecked(position, true);
+//                mTracksListView.setSelection(mPosition); // make sure selected item is in view
+            }
+            mPosition = position;
+        }
+    };
 
     public TopTracksFragment() {
     }
@@ -82,15 +104,22 @@ public class TopTracksFragment extends Fragment {
         }
 
         // Get a reference to the ListView, and attach the adapter
-        ListView listView = (ListView) rootView.findViewById(R.id.list_view_top_tracks);
-        listView.setAdapter(mTopTracksAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mTracksListView = (ListView) rootView.findViewById(R.id.list_view_top_tracks);
+        mTracksListView.setAdapter(mTopTracksAdapter);
+        mTracksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 ((TrackSelectedCallback) getActivity())
                         .onTrackSelected(mArtist, mTopTracks, position);
+                mPosition = position;
             }
         });
+
+        // Restore scroll position
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            mTracksListView.setSelection(mPosition);
+        }
 
         return rootView;
     }
@@ -100,6 +129,9 @@ public class TopTracksFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelable(STATE_ARTIST, mArtist);
         outState.putParcelableArrayList(STATE_TRACKS, mTopTracks);
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
     }
 
     private class SearchTrackTask extends AsyncTask<String, Void, ArrayList<MyTrack>> {
@@ -166,4 +198,20 @@ public class TopTracksFragment extends Fragment {
             }
         }
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mOnMusicPlayerSongChanged,
+                new IntentFilter(PlayerService.MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION));
+    }
+
+    @Override
+    public void onStop() {
+        LocalBroadcastManager.getInstance(getActivity())
+                .unregisterReceiver(mOnMusicPlayerSongChanged);
+        super.onStop();
+    }
+
 }

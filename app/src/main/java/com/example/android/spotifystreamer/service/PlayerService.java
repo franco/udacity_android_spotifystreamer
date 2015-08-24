@@ -13,10 +13,11 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by franco on 02/08/15.
@@ -25,21 +26,27 @@ public class PlayerService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener {
 
-    public static final String MUSIC_PLAYER_NOTIFICATION =
-            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION";
-    public static final String MUSIC_PLAYER_NOTIFICATION_EXTRA = "play_notification_extra";
-    public static final String MUSIC_PLAYER_ACTION_DOWNLOADING = "downloading";
-    public static final String MUSIC_PLAYER_ACTION_PLAYING = "playing";
-    public static final String MUSIC_PLAYER_ACTION_STOPPED = "stopped";
-    public static final String MUSIC_PLAYER_ACTION_SONG_CHANGED = "song_changed";
+    public static final String MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION =
+            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PLAYBACK_STARTED";
+    public static final String MUSIC_PLAYER_PREPARING_NOTIFICATION =
+            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PREPARING";
+    public static final String MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION =
+            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PLAYBACK_STOPPED";
+    public static final String MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION =
+            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.SONG_CHANGED";
+    public static final String SONG_POSITION_EXTRA = "song_position_exra";
+    public static final String ARTIST_EXTRA = "artist_exra";
+
+
 
     private static final String LOG_TAG = PlayerService.class.getSimpleName();
 
     private int mTrackPosition;
     private MediaPlayer mMediaPlayer;
-    private List<MyTrack> mTracks;
+    private ArrayList<MyTrack> mTracks;
+    private Artist mArtist;
     private MyTrack mCurrentlyLoadedTrack;
-    private boolean isPrepared;
+    private boolean mIsPrepared;
 
     private final IBinder mPlayerBinder = new PlayerBinder();
 
@@ -54,8 +61,14 @@ public class PlayerService extends Service
         mMediaPlayer.setOnCompletionListener(this);
         // TODO wakelock and foreground
 //            mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        Log.d(LOG_TAG, "onCreate");
+        Log.d(LOG_TAG, "onCreate Service " + this.hashCode());
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "onDestroy Service " + this.hashCode());
     }
 
     @Override
@@ -69,19 +82,14 @@ public class PlayerService extends Service
         return 0;
     }
 
-    public void playTracks(List<MyTrack> tracks, int trackPosition) {
-        Log.d(LOG_TAG, "playTracks(List<MyTracks>, trackPosition");
+    public void playTracks(ArrayList<MyTrack> tracks, int trackPosition, Artist artist) {
 
-        if (tracks.get(trackPosition) == mCurrentlyLoadedTrack) {
-            // nothing to do. Just play the
-            Log.d(LOG_TAG, "continue play current song");
-
-        } else {
-            Log.d(LOG_TAG, "loading new Song");
-
+        // Only start playing requested song is it is another then the already loaded song.
+        if (!tracks.get(trackPosition).equals(mCurrentlyLoadedTrack)) {
             mTracks = tracks;
             mTrackPosition = trackPosition;
-            isPrepared = false;
+            mArtist = artist;
+            mIsPrepared = false;
         }
 
         playSong();
@@ -90,11 +98,10 @@ public class PlayerService extends Service
     public void playSong() {
         Log.d(LOG_TAG, "playSong");
 
-        if (isPrepared) {
+        if (mIsPrepared) {
             startSong();
-            broadcastPlayerNotification(MUSIC_PLAYER_ACTION_PLAYING);
         } else {
-            broadcastPlayerNotification(MUSIC_PLAYER_ACTION_DOWNLOADING);
+            sendDownloadingNotification();
 
             mMediaPlayer.reset();
 
@@ -116,30 +123,32 @@ public class PlayerService extends Service
     }
 
     public void playNextSong() {
-        if (mTrackPosition < mTracks.size()) {
+        if (!isLastSong()) {
             mTrackPosition++;
-            isPrepared = false;
+            mIsPrepared = false;
             playSong();
-            broadcastPlayerNotification(MUSIC_PLAYER_ACTION_SONG_CHANGED);
+            sendSongChangedNotification(mTrackPosition);
         }
     }
 
     public void playPrevSong() {
-        if (mTrackPosition > 0) {
+        if (!isFirstSong()) {
             mTrackPosition--;
-            isPrepared = false;
+            mIsPrepared = false;
             playSong();
-            broadcastPlayerNotification(MUSIC_PLAYER_ACTION_SONG_CHANGED);
+            sendSongChangedNotification(mTrackPosition);
+
         }
     }
 
     public void pauseSong() {
         mMediaPlayer.pause();
-        broadcastPlayerNotification(MUSIC_PLAYER_ACTION_STOPPED);
+        sendPlaybackStoppedNotification();
     }
 
     public void startSong() {
         mMediaPlayer.start();
+        sendPlaybackStartedNotification();
     }
 
     public void seekTo(int position) {
@@ -159,11 +168,19 @@ public class PlayerService extends Service
         return mTrackPosition == 0;
     }
     public boolean isLastSong() {
-        return mTrackPosition == mTracks.size();
+        return mTrackPosition == mTracks.size() - 1;
     }
 
     public int getCurrentPosition() {
         return mTrackPosition;
+    }
+
+    public ArrayList<MyTrack> getSongs() {
+        return mTracks;
+    }
+
+    public Artist getArtist() {
+        return mArtist;
     }
 
     @Override
@@ -187,13 +204,17 @@ public class PlayerService extends Service
     public void onPrepared(MediaPlayer mediaPlayer) {
         Log.d(LOG_TAG, "onPrepared called.... starting mediaPlayer.start()");
         mCurrentlyLoadedTrack = mTracks.get(mTrackPosition);
-        isPrepared = true;
+        mIsPrepared = true;
         playSong();
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        broadcastPlayerNotification(MUSIC_PLAYER_ACTION_STOPPED);
+        if (isLastSong()) {
+            sendPlaybackStoppedNotification();
+        } else {
+            playNextSong();
+        }
     }
 
     public static class StreamingException extends Exception {
@@ -208,9 +229,30 @@ public class PlayerService extends Service
         }
     }
 
-    private void broadcastPlayerNotification(String message) {
-        Intent i = new Intent(MUSIC_PLAYER_NOTIFICATION);
-        i.putExtra(MUSIC_PLAYER_NOTIFICATION_EXTRA, message);
+    private void sendSongChangedNotification(int trackPosition) {
+        Log.d(LOG_TAG, "send notification: SONG CHANGED");
+        Intent i = new Intent(MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION);
+        i.putExtra(SONG_POSITION_EXTRA, trackPosition);
+        i.putExtra(ARTIST_EXTRA, mArtist);
+        broadcastNotification(i);
+    }
+
+    private void sendPlaybackStartedNotification() {
+        Log.d(LOG_TAG, "send notification: PLAYBACK_STARTED");
+        broadcastNotification(new Intent(MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION));
+    }
+
+    private void sendPlaybackStoppedNotification() {
+        Log.d(LOG_TAG, "send notification: PLAYBACK_STOPPED");
+        broadcastNotification(new Intent(MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION));
+    }
+
+    private void sendDownloadingNotification() {
+        Log.d(LOG_TAG, "send notification: PREPARING");
+        broadcastNotification(new Intent(MUSIC_PLAYER_PREPARING_NOTIFICATION));
+    }
+
+    private void broadcastNotification(Intent i) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }
 }

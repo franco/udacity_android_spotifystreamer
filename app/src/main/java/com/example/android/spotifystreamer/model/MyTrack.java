@@ -70,4 +70,31 @@ public class MyTrack implements Parcelable {
         return artworkUrl != null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MyTrack myTrack = (MyTrack) o;
+
+        if (trackName != null ? !trackName.equals(myTrack.trackName) : myTrack.trackName != null)
+            return false;
+        if (albumName != null ? !albumName.equals(myTrack.albumName) : myTrack.albumName != null)
+            return false;
+        if (thumbnailUrl != null ? !thumbnailUrl.equals(myTrack.thumbnailUrl) : myTrack.thumbnailUrl != null)
+            return false;
+        if (artworkUrl != null ? !artworkUrl.equals(myTrack.artworkUrl) : myTrack.artworkUrl != null)
+            return false;
+        return !(previewUrl != null ? !previewUrl.equals(myTrack.previewUrl) : myTrack.previewUrl != null);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = trackName != null ? trackName.hashCode() : 0;
+        result = 31 * result + (albumName != null ? albumName.hashCode() : 0);
+        result = 31 * result + (thumbnailUrl != null ? thumbnailUrl.hashCode() : 0);
+        result = 31 * result + (artworkUrl != null ? artworkUrl.hashCode() : 0);
+        result = 31 * result + (previewUrl != null ? previewUrl.hashCode() : 0);
+        return result;
+    }
 }
