@@ -6,10 +6,10 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:paddingLeft="@dimen/activity_horizontal_margin"
-              android:paddingRight="@dimen/activity_horizontal_margin"
-              android:paddingTop="@dimen/activity_vertical_margin"
-              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/player_horizontal_margin"
+              android:paddingRight="@dimen/player_horizontal_margin"
+              android:paddingTop="@dimen/player_vertical_margin"
+              android:paddingBottom="@dimen/player_vertical_margin"
               android:orientation="vertical"
               android:gravity="center_horizontal"
               tools:context="com.example.android.spotifystreamer.PlayerFragment">
@@ -29,9 +29,15 @@
 
     <ImageView
         android:id="@+id/album_artwork"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        android:layout_marginLeft="@dimen/player_artwork_horizontal_padding"
+        android:layout_marginRight="@dimen/player_artwork_horizontal_padding"
+        android:layout_marginTop="@dimen/player_artwork_vertical_padding"
+        android:layout_marginBottom="@dimen/player_artwork_vertical_padding"/>
     <TextView
         android:id="@+id/track_name"
         android:layout_width="wrap_content"
@@ -41,12 +47,12 @@
     <SeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/seekBar"/>
+        android:id="@+id/seekBar"
+        android:layout_margin="0dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp">
+        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/track_current_position"
             android:layout_width="match_parent"
@@ -73,7 +79,8 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
         <ImageButton
             android:id="@+id/prev_button"
             android:layout_width="wrap_content"
