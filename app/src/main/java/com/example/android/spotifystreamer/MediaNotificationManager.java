@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.MediaDescription;
 import android.os.RemoteException;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -249,26 +250,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 mService.getString(R.string.next_button_label), mNextIntent);
 
 
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(mService, FullScreenPlayerActivity.class);
-
-        // The stack builder object will contain an artificial back stack for the
-        // started Activity.
-        // This ensures that navigating backward from the Activity leads out of
-        // your application to the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mService);
-
-        // Adds the back stack for the Intent (but not the Intent itself)
-        // TODO depends if tablet or phone
-        stackBuilder.addParentStack(TopTracksActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        notificationBuilder.setContentIntent(resultPendingIntent);
+        notificationBuilder.setContentIntent(createContentIntent());
 
         setNotificationPlaybackState(notificationBuilder);
 
@@ -309,4 +291,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
         builder.setOngoing(mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING);
     }
 
+    private PendingIntent createContentIntent() {
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(mService, FullScreenPlayerActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return PendingIntent.getActivity(mService, REQUEST_CODE, resultIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+    }
 }

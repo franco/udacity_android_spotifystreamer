@@ -67,7 +67,7 @@ public class PlayerService extends Service implements Playback.Callback {
         mPlayback.setCallback(this);
 
         // Start a new MediaSession
-        ComponentName mediaButtonEventReceiver = null; // TODO this must be set for pre-LOLLIPOP
+        ComponentName mediaButtonEventReceiver = null;
         mSession = new MediaSessionCompat(getApplicationContext(), MEDIA_SESSION_TAG,
                 mediaButtonEventReceiver, null);
         mSession.setCallback(new MediaSessionCallback());
@@ -97,8 +97,7 @@ public class PlayerService extends Service implements Playback.Callback {
     public MediaSessionCompat.Token getSessionToken() {
         return mSession.getSessionToken();
     }
-
-    // TODO: rename! this is now more an initialization than a play method
+    
     public void playTracks(ArrayList<MyTrack> tracks, int trackPosition, Artist artist) {
 
         mTracks = tracks;
@@ -150,7 +149,7 @@ public class PlayerService extends Service implements Playback.Callback {
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(LOG_TAG, "onUnbind (service)" + this.hashCode());
-//        stopSelf();
+//        O();
         return false;
     }
 
