@@ -235,6 +235,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 .setContentText(description.getSubtitle())
                 .setUsesChronometer(true);
 
+
         notificationBuilder.addAction(R.drawable.ic_skip_previous_white_24dp,
                 mService.getString(R.string.previews_button_label), mPreviousIntent);
         if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PAUSED) {
@@ -269,6 +270,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 );
         notificationBuilder.setContentIntent(resultPendingIntent);
 
+        setNotificationPlaybackState(notificationBuilder);
+
         return notificationBuilder.build();
     }
 
@@ -278,4 +281,32 @@ public class MediaNotificationManager extends BroadcastReceiver {
             mNotificationManager.notify(NOTIFICATION_ID, notification);
         }
     }
+
+    private void setNotificationPlaybackState(NotificationCompat.Builder builder) {
+        Log.d(LOG_TAG, "updateNotificationPlaybackState. mPlaybackState=" + mPlaybackState);
+        if (mPlaybackState == null || !mStarted) {
+            Log.d(LOG_TAG, "updateNotificationPlaybackState. cancelling notification!");
+            mService.stopForeground(true);
+            return;
+        }
+        if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING
+                && mPlaybackState.getPosition() >= 0) {
+            Log.d(LOG_TAG, "updateNotificationPlaybackState. updating playback position to " +
+                    ((System.currentTimeMillis() - mPlaybackState.getPosition()) / 1000) + " seconds");
+            builder
+                    .setWhen(System.currentTimeMillis() - mPlaybackState.getPosition())
+                    .setShowWhen(true)
+                    .setUsesChronometer(true);
+        } else {
+            Log.d(LOG_TAG, "updateNotificationPlaybackState. hiding playback position");
+            builder
+                    .setWhen(0)
+                    .setShowWhen(false)
+                    .setUsesChronometer(false);
+        }
+
+        // Make sure that the notification can be dismissed by the user when we are not playing:
+        builder.setOngoing(mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING);
+    }
+
 }
