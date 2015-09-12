@@ -5,10 +5,7 @@
 package com.example.android.spotifystreamer;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.android.spotifystreamer.model.Artist;
@@ -80,7 +77,7 @@ public class SearchArtistActivity extends BaseActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.action_now_playing && mTwoPane) {
+        if (item.getItemId() == R.id.action_now_playing) {
             if (mTwoPane) {
                 new PlayerFragment().show(getSupportFragmentManager(), PLAYERFRAGMENT_TAG);
                 return true;

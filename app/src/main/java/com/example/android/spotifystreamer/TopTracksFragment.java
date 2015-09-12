@@ -13,7 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,9 +45,8 @@ import retrofit.RetrofitError;
  */
 public class TopTracksFragment extends Fragment {
 
-    private static final String LOG_TAG = TopTracksFragment.class.getSimpleName();
-
     public static final String EXTRA_ARTIST = "artist";
+    private static final String LOG_TAG = TopTracksFragment.class.getSimpleName();
     private static final String STATE_ARTIST = "state_artist";
     private static final String STATE_TRACKS = "state_tracks";
     private static final String SELECTED_KEY = "selected_position";
@@ -57,13 +56,6 @@ public class TopTracksFragment extends Fragment {
     private TopTracksAdapter mTopTracksAdapter;
     private ListView mTracksListView;
     private int mPosition = ListView.INVALID_POSITION;
-
-
-    public interface TrackSelectedCallback {
-        /** Callback for when an item has been selected. */
-        void onTrackSelected(Artist artist, ArrayList<MyTrack> tracks, int position);
-    }
-
     private BroadcastReceiver mOnMusicPlayerSongChanged = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -100,7 +92,10 @@ public class TopTracksFragment extends Fragment {
 
         if (mArtist != null) {
             // Set action bar subtitle
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
+            ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setSubtitle(mArtist.name);
+            }
         }
 
         // Get a reference to the ListView, and attach the adapter
@@ -132,6 +127,28 @@ public class TopTracksFragment extends Fragment {
         if (mPosition != ListView.INVALID_POSITION) {
             outState.putInt(SELECTED_KEY, mPosition);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mOnMusicPlayerSongChanged,
+                new IntentFilter(PlayerService.MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION));
+    }
+
+    @Override
+    public void onStop() {
+        LocalBroadcastManager.getInstance(getActivity())
+                .unregisterReceiver(mOnMusicPlayerSongChanged);
+        super.onStop();
+    }
+
+    public interface TrackSelectedCallback {
+        /**
+         * Callback for when an item has been selected.
+         */
+        void onTrackSelected(Artist artist, ArrayList<MyTrack> tracks, int position);
     }
 
     private class SearchTrackTask extends AsyncTask<String, Void, ArrayList<MyTrack>> {
@@ -197,21 +214,6 @@ public class TopTracksFragment extends Fragment {
                 mProgressDialog.dismiss();
             }
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                mOnMusicPlayerSongChanged,
-                new IntentFilter(PlayerService.MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION));
-    }
-
-    @Override
-    public void onStop() {
-        LocalBroadcastManager.getInstance(getActivity())
-                .unregisterReceiver(mOnMusicPlayerSongChanged);
-        super.onStop();
     }
 
 }

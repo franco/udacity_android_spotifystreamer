@@ -4,9 +4,7 @@
 
 package com.example.android.spotifystreamer.service;
 
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -16,8 +14,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import com.example.android.spotifystreamer.MediaNotificationManager;
 import com.example.android.spotifystreamer.Playback;
@@ -36,24 +32,18 @@ import java.util.List;
  */
 public class PlayerService extends Service implements Playback.Callback {
 
-    private static final String LOG_TAG = PlayerService.class.getSimpleName();
-
     public static final String MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION =
             "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.SONG_CHANGED";
     public static final String SONG_POSITION_EXTRA = "song_position_exra";
     public static final String ARTIST_EXTRA = "artist_exra";
     private static final String MEDIA_SESSION_TAG = "media_session";
-
+    private final IBinder mPlayerBinder = new PlayerBinder();
     private int mTrackPosition;
     private ArrayList<MyTrack> mTracks;
     private Artist mArtist;
-
     private MediaSessionCompat mSession;
     private List<MediaSessionCompat.QueueItem> mPlayingQueue;
-
     private Playback mPlayback;
-
-    private final IBinder mPlayerBinder = new PlayerBinder();
     private MediaNotificationManager mMediaNotificationManager;
     private boolean mShowNotification;
 
@@ -66,9 +56,7 @@ public class PlayerService extends Service implements Playback.Callback {
         mPlayback.setCallback(this);
 
         // Start a new MediaSession
-        ComponentName mediaButtonEventReceiver = null;
-        mSession = new MediaSessionCompat(getApplicationContext(), MEDIA_SESSION_TAG,
-                mediaButtonEventReceiver, null);
+        mSession = new MediaSessionCompat(getApplicationContext(), MEDIA_SESSION_TAG, null, null);
         mSession.setCallback(new MediaSessionCallback());
         mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -97,7 +85,7 @@ public class PlayerService extends Service implements Playback.Callback {
         mArtist = artist;
         mPlayingQueue = new ArrayList<>();
         long i = 0;
-        for (MyTrack track: mTracks) {
+        for (MyTrack track : mTracks) {
             mPlayingQueue.add(new MediaSessionCompat.QueueItem(track.getMediaMetadata().getDescription(), i));
             i++;
         }
@@ -109,6 +97,7 @@ public class PlayerService extends Service implements Playback.Callback {
     public boolean isFirstSong() {
         return mTrackPosition == 0;
     }
+
     public boolean isLastSong() {
         return mTrackPosition == mTracks.size() - 1;
     }
@@ -142,12 +131,6 @@ public class PlayerService extends Service implements Playback.Callback {
         return false;
     }
 
-    public class PlayerBinder extends Binder {
-        public PlayerService getService() {
-            return PlayerService.this;
-        }
-    }
-
     private void sendSongChangedNotification(int trackPosition) {
         Intent i = new Intent(MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION);
         i.putExtra(SONG_POSITION_EXTRA, trackPosition);
@@ -161,7 +144,7 @@ public class PlayerService extends Service implements Playback.Callback {
 
     /**
      * Update the current media player state, optionally showing an error message.
-     *
+     * <p/>
      * This method was inspired from the sample UniversalMusicPlayer code
      * https://github.com/googlesamples/android-UniversalMusicPlayer
      *
@@ -201,8 +184,9 @@ public class PlayerService extends Service implements Playback.Callback {
         mSession.setMetadata(track);
     }
 
-
-    private @PlaybackStateCompat.Actions long getAvailableActions() {
+    private
+    @PlaybackStateCompat.Actions
+    long getAvailableActions() {
         long actions = PlaybackStateCompat.ACTION_PLAY;
         if (mTracks == null || mTracks.isEmpty()) {
             return actions;
@@ -219,7 +203,6 @@ public class PlayerService extends Service implements Playback.Callback {
         }
         return actions;
     }
-
 
     @Override
     public void onCompletion() {
@@ -258,12 +241,10 @@ public class PlayerService extends Service implements Playback.Callback {
         }
     }
 
-    private NotificationCompat.Action generateAction( int icon, String title, String intentAction ) {
-        Intent intent = new Intent( getApplicationContext().getApplicationContext(), PlayerService.class );
-        intent.setAction( intentAction );
-        PendingIntent pendingIntent =
-                PendingIntent.getService(getApplicationContext().getApplicationContext(), 1, intent, 0);
-        return new NotificationCompat.Action.Builder( icon, title, pendingIntent ).build();
+    public class PlayerBinder extends Binder {
+        public PlayerService getService() {
+            return PlayerService.this;
+        }
     }
 
     private final class MediaSessionCallback extends MediaSessionCompat.Callback {

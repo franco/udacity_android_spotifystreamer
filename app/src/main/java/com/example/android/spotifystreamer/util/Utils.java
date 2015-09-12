@@ -31,7 +31,9 @@ public class Utils {
         return country;
     }
 
-    /** Returns if network is available */
+    /**
+     * Returns if network is available
+     */
     public static boolean isNetworkAvailable(Context context) {
         // Copied from
         // https://udacity-github-sync-content.s3.amazonaws.com/_imgs/752/1436612063/Screen_Shot_2015-07-11_at_12.53.52.png
@@ -41,7 +43,9 @@ public class Utils {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    /** Displays an alert dialog */
+    /**
+     * Displays an alert dialog
+     */
     public static void showAlertDialog(Context context, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
         alertDialog.setTitle(R.string.error_title);
@@ -63,7 +67,7 @@ public class Utils {
 
     /**
      * Returns a formatted time string (m:ss).
-     *
+     * <p/>
      * Copied from http://stackoverflow.com/a/625624
      */
     public static String formatScrubBarTime(int duration_in_ms) {

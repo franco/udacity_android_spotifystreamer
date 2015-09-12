@@ -17,60 +17,38 @@ import java.io.IOException;
 
 /**
  * This class handles the actual playback of a song.
- *
+ * <p/>
  * This class is heavly inspired by the LocalPlayback class of UniversalMusicPlayer sample code.
  */
 public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnSeekCompleteListener {
 
-    private MediaPlayer mMediaPlayer;
-    private PlayerService mService;
-    private MyTrack mCurrentTrack;
-
-    private @PlaybackStateCompat.State int mState = PlaybackStateCompat.STATE_NONE;
-
     public static Callback sDummyCallback = new Callback() {
         @Override
-        public void onCompletion() {}
+        public void onCompletion() {
+        }
 
         @Override
-        public void onPlaybackStatusChanged(int state) {}
+        public void onPlaybackStatusChanged(int state) {
+        }
 
         @Override
-        public void onError(String error) {}
+        public void onError(String error) {
+        }
 
         @Override
-        public void onMetadataChanged() {}
+        public void onMetadataChanged() {
+        }
     };
 
+    private MediaPlayer mMediaPlayer;
+    private MyTrack mCurrentTrack;
+    private
+    @PlaybackStateCompat.State
+    int mState = PlaybackStateCompat.STATE_NONE;
     private Callback mCallback = sDummyCallback;
 
-    public interface Callback {
-        /**
-         * On current music completed.
-         */
-        void onCompletion();
-        /**
-         * on Playback status changed
-         * Implementations can use this callback to update
-         * playback state on the media sessions.
-         */
-        void onPlaybackStatusChanged(int state);
-
-        /**
-         * @param error to be added to the PlaybackState
-         */
-        void onError(String error);
-
-        /**
-         * On playing new song
-         */
-        void onMetadataChanged();
-    }
-
     public Playback(PlayerService service) {
-        mService = service;
-
         // Init MediaPlayer
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -78,7 +56,7 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
-        mMediaPlayer.setWakeMode(mService.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setWakeMode(service.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     public boolean isPlaying() {
@@ -95,7 +73,7 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     }
 
     public void play(MyTrack track) {
-        if (mCurrentTrack == track)  {
+        if (mCurrentTrack == track) {
             // Song is already loaded
             playSong();
         } else {
@@ -135,7 +113,7 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
 
     public void seekTo(int position) {
         if (mMediaPlayer.isPlaying()) {
-            mState = PlaybackState.STATE_BUFFERING;
+            mState = PlaybackStateCompat.STATE_BUFFERING;
         }
         mMediaPlayer.seekTo(position);
         mCallback.onPlaybackStatusChanged(mState);
@@ -145,13 +123,13 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         return mMediaPlayer.getCurrentPosition();
     }
 
-
-    /* MediaPlayer callbacks */
-
     @Override
     public void onCompletion(MediaPlayer mp) {
         mCallback.onCompletion();
     }
+
+
+    /* MediaPlayer callbacks */
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -163,13 +141,39 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         playSong();
     }
 
-    /** Called when MediaPlayer has completed a seek */
+    /**
+     * Called when MediaPlayer has completed a seek
+     */
     @Override
     public void onSeekComplete(MediaPlayer mp) {
         if (mState == PlaybackState.STATE_BUFFERING) {
             mMediaPlayer.start();
-            mState = PlaybackState.STATE_PLAYING;
+            mState = PlaybackStateCompat.STATE_PLAYING;
         }
         mCallback.onPlaybackStatusChanged(mState);
+    }
+
+    public interface Callback {
+        /**
+         * On current music completed.
+         */
+        void onCompletion();
+
+        /**
+         * on Playback status changed
+         * Implementations can use this callback to update
+         * playback state on the media sessions.
+         */
+        void onPlaybackStatusChanged(int state);
+
+        /**
+         * @param error to be added to the PlaybackState
+         */
+        void onError(String error);
+
+        /**
+         * On playing new song
+         */
+        void onMetadataChanged();
     }
 }

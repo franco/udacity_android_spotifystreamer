@@ -6,7 +6,6 @@ package com.example.android.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 /**
  * Full screen player that shows the current playing music with its artwork and controls

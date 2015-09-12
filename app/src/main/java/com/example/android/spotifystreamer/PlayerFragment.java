@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * DialogFragment that holds the player widget.
- *
+ * <p/>
  * The design was heavily influenced by the UniversalMusicPlayer sample code. E.g. Scrub bar
  * update was copied from there.
  */
@@ -62,7 +62,7 @@ public class PlayerFragment extends DialogFragment {
     private ScrubBarUpdater mScrubBarUpdater;
 
     // Callback that ensures that we are showing the controls
-    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback(){
+    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             updatePlaybackState(state);
@@ -73,6 +73,21 @@ public class PlayerFragment extends DialogFragment {
             if (metadata != null) {
                 updateMediaDescription();
             }
+        }
+    };
+    private ServiceConnection mPlayerConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) iBinder;
+            mPlayerService = binder.getService();
+            mPlayerBound = true;
+            updateMediaDescription();
+            connectToMediaSession(mPlayerService.getSessionToken());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mPlayerBound = false;
         }
     };
 
@@ -159,7 +174,9 @@ public class PlayerFragment extends DialogFragment {
         return rootView;
     }
 
-    /** The system calls this only when creating the layout in a dialog. */
+    /**
+     * The system calls this only when creating the layout in a dialog.
+     */
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -221,22 +238,6 @@ public class PlayerFragment extends DialogFragment {
         mControls.nextButton.setEnabled(!mPlayerService.isLastSong());
     }
 
-    private ServiceConnection mPlayerConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) iBinder;
-            mPlayerService = binder.getService();
-            mPlayerBound = true;
-            updateMediaDescription();
-            connectToMediaSession(mPlayerService.getSessionToken());
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mPlayerBound = false;
-        }
-    };
-
     private void connectToMediaSession(MediaSessionCompat.Token token) {
         try {
             mMediaController = new MediaControllerCompat(getActivity(), token);
@@ -263,11 +264,9 @@ public class PlayerFragment extends DialogFragment {
                 updateProgress();
             }
         };
-
-        private ScheduledFuture<?> mScheduleFuture;
-
         private final ScheduledExecutorService mExecutorService =
                 Executors.newSingleThreadScheduledExecutor();
+        private ScheduledFuture<?> mScheduleFuture;
 
         public void scheduleSeekbarUpdate() {
             stopSeekbarUpdate();

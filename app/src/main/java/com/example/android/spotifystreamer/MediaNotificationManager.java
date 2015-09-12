@@ -28,36 +28,56 @@ import com.squareup.picasso.Target;
 
 /**
  * Manages the notification.
- *
+ * <p/>
  * Concept copied from sample UniversalMusicPlayer
  * https://github.com/googlesamples/android-UniversalMusicPlayer
  */
 public class MediaNotificationManager extends BroadcastReceiver {
-
-    private static final String LOG_TAG = MediaNotificationManager.class.getSimpleName();
-    private static final int NOTIFICATION_ID = 0;
-    private static final int REQUEST_CODE = 100;
 
     public static final String ACTION_PAUSE = "com.example.android.spotifystreamer.ACTION_PAUSE";
     public static final String ACTION_PLAY = "com.example.android.spotifystreamer.ACTION_PLAY";
     public static final String ACTION_PREV = "com.example.android.spotifystreamer.ACTION_PREV";
     public static final String ACTION_NEXT = "com.example.android.spotifystreamer.ACTION_NEXT";
 
-    private PlayerService mService;
-    private MediaSessionCompat.Token mSessionToken;
-    private MediaControllerCompat mMediaController;
-
+    private static final String LOG_TAG = MediaNotificationManager.class.getSimpleName();
+    private static final int NOTIFICATION_ID = 0;
+    private static final int REQUEST_CODE = 100;
     private final NotificationManager mNotificationManager;
     private final PendingIntent mPauseIntent;
     private final PendingIntent mPlayIntent;
     private final PendingIntent mPreviousIntent;
     private final PendingIntent mNextIntent;
-
+    private PlayerService mService;
+    private MediaSessionCompat.Token mSessionToken;
+    private MediaControllerCompat mMediaController;
     private MediaMetadataCompat mMetadata;
     private PlaybackStateCompat mPlaybackState;
 
     private boolean mStarted = false;
+    private final MediaControllerCompat.Callback mMediaControllerCallback =
+            new MediaControllerCompat.Callback() {
+                @Override
+                public void onPlaybackStateChanged(PlaybackStateCompat state) {
+                    mPlaybackState = state;
+                    if (state.getState() == PlaybackStateCompat.STATE_STOPPED
+                            || state.getState() == PlaybackStateCompat.STATE_NONE) {
+                        stopNotification();
+                    } else {
+                        createAndNotifyNotification();
+                    }
+                }
 
+                @Override
+                public void onMetadataChanged(MediaMetadataCompat metadata) {
+                    mMetadata = metadata;
+                    createAndNotifyNotification();
+                }
+
+                @Override
+                public void onSessionDestroyed() {
+                    updateSessionToken();
+                }
+            };
 
     public MediaNotificationManager(PlayerService service) {
         mService = service;
@@ -100,9 +120,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
                 mService.startForeground(NOTIFICATION_ID, notification);
                 mStarted = true;
+                mNotificationManager.notify(NOTIFICATION_ID, notification);
             }
-
-            mNotificationManager.notify(NOTIFICATION_ID, notification);
         }
     }
 
@@ -168,31 +187,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
         }
     }
 
-    private final MediaControllerCompat.Callback mMediaControllerCallback =
-            new MediaControllerCompat.Callback() {
-                @Override
-                public void onPlaybackStateChanged(PlaybackStateCompat state) {
-                    mPlaybackState = state;
-                    if (state.getState() == PlaybackStateCompat.STATE_STOPPED
-                            || state.getState() == PlaybackStateCompat.STATE_NONE) {
-                        stopNotification();
-                    } else {
-                        createAndNotifyNotification();
-                    }
-                }
-
-                @Override
-                public void onMetadataChanged(MediaMetadataCompat metadata) {
-                    mMetadata = metadata;
-                    createAndNotifyNotification();
-                }
-
-                @Override
-                public void onSessionDestroyed() {
-                    updateSessionToken();
-                }
-            };
-
     private Notification createNotification() {
         if (mMetadata == null || mPlaybackState == null) {
             return null;
@@ -208,11 +202,14 @@ public class MediaNotificationManager extends BroadcastReceiver {
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                 notificationBuilder.setLargeIcon(bitmap);
             }
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {}
 
             @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+            public void onBitmapFailed(Drawable errorDrawable) {
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
         };
 
         Picasso.with(mService).load(mMetadata.getDescription().getIconUri()).into(artworkTarget);
@@ -220,11 +217,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle()
                 .setMediaSession(mSessionToken)
-                .setShowActionsInCompactView(new int[]{1}); // show only play/pause in compact view
+                .setShowActionsInCompactView(1); // show only play/pause in compact view
 
         notificationBuilder
                 .setStyle(style)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(description.getTitle())
                 .setContentText(description.getSubtitle())

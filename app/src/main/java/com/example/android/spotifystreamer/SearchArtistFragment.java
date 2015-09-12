@@ -47,14 +47,8 @@ public class SearchArtistFragment extends Fragment {
 
     private ArrayList<Artist> mArtists;
     private ArtistsAdapter mArtistsAdapter;
-    private ListView mListView;
     private int mPosition = ListView.INVALID_POSITION;
 
-
-    public interface ArtistSelectedCallback {
-        /** Callback for when an item has been selected. */
-        void onArtistSelected(Artist artist);
-    }
 
     public SearchArtistFragment() {
     }
@@ -73,7 +67,7 @@ public class SearchArtistFragment extends Fragment {
         mArtistsAdapter = new ArtistsAdapter(getActivity(), mArtists);
 
         // Get a reference to the ListView, attach the adapter, and set onItemClickListener
-        mListView = (ListView) rootView.findViewById(R.id.list_view_artist_search);
+        ListView mListView = (ListView) rootView.findViewById(R.id.list_view_artist_search);
         mListView.setAdapter(mArtistsAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -130,6 +124,13 @@ public class SearchArtistFragment extends Fragment {
         if (mPosition != ListView.INVALID_POSITION) {
             outState.putInt(SELECTED_KEY, mPosition);
         }
+    }
+
+    public interface ArtistSelectedCallback {
+        /**
+         * Callback for when an item has been selected.
+         */
+        void onArtistSelected(Artist artist);
     }
 
     private class SearchArtistTask extends AsyncTask<String, Void, ArrayList<Artist>> {

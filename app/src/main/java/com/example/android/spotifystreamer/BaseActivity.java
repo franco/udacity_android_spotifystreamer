@@ -35,20 +35,18 @@ public abstract class BaseActivity extends AppCompatActivity {
     private MediaControllerCompat mMediaController;
     private boolean mPlayerBound;
     private boolean mShowPlayButton;
-    private SharedPreferences mPrefs;
-
     /**
      * MediaController Callback to listen for playbackStateChanges in order to show/hide now
      * playing menu item.
      */
-    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback(){
+    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             mShowPlayButton = state.getState() == PlaybackStateCompat.STATE_PLAYING;
             invalidateOptionsMenu();
         }
     };
-
+    private SharedPreferences mPrefs;
     /**
      * Service callback. When bound to services it creates also a MediaController.
      */
@@ -140,7 +138,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 item.setChecked(isChecked);
                 SharedPreferences.Editor editor = mPrefs.edit();
                 editor.putBoolean(getString(R.string.pref_show_notification_key), isChecked);
-                editor.commit();
+                editor.apply();
 
                 if (mPlayerService != null) {
                     mPlayerService.setShowNotification(isChecked);
