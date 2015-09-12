@@ -12,8 +12,9 @@
           android:orderInCategory="100"
           app:showAsAction="always"/>
 
-    <!--<item android:id="@+id/action_settings"-->
-    <!--android:title="@string/action_settings"-->
-    <!--android:orderInCategory="100"-->
-    <!--app:showAsAction="never"/>-->
+    <item
+        android:id="@+id/show_notification_menu"
+        android:checkable="true"
+        android:title="@string/pref_show_notification_label"
+        android:orderInCategory="100"/>
 </menu>

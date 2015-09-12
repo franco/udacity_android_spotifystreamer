@@ -7,9 +7,11 @@ package com.example.android.spotifystreamer;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -33,6 +35,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private MediaControllerCompat mMediaController;
     private boolean mPlayerBound;
     private boolean mShowPlayButton;
+    private SharedPreferences mPrefs;
 
     /**
      * MediaController Callback to listen for playbackStateChanges in order to show/hide now
@@ -101,6 +104,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlayIntent = new Intent(this, PlayerService.class);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
@@ -120,9 +124,49 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.action_now_playing:
+                startActivity(new Intent(this, FullScreenPlayerActivity.class));
+                return true;
+            case R.id.show_notification_menu:
+                boolean isChecked = !item.isChecked();
+                item.setChecked(isChecked);
+                SharedPreferences.Editor editor = mPrefs.edit();
+                editor.putBoolean(getString(R.string.pref_show_notification_key), isChecked);
+                editor.commit();
+
+                if (mPlayerService != null) {
+                    mPlayerService.setShowNotification(isChecked);
+                }
+
+                Log.d(LOG_TAG, "store notification preference value=" + isChecked);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_now_playing);
         item.setVisible(mShowPlayButton);
+
+        boolean showNotification = mPrefs.getBoolean(getString(R.string.pref_show_notification_key),
+                getResources().getBoolean(R.bool.pref_show_notification_default));
+        item = menu.findItem(R.id.show_notification_menu);
+        item.setChecked(showNotification);
+        Log.d(LOG_TAG, "read notification pref value=" + showNotification);
         return super.onPrepareOptionsMenu(menu);
     }
 }

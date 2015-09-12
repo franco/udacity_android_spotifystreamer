@@ -6,8 +6,6 @@ package com.example.android.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
@@ -47,23 +45,5 @@ public class TopTracksActivity extends BaseActivity
             getMediaControllerCompat().getTransportControls().play();
             startActivity(new Intent(this, FullScreenPlayerActivity.class));
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_top_tracks, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_now_playing) {
-            startActivity(new Intent(this, FullScreenPlayerActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -21,4 +21,6 @@
     <string name="next_button_label">Next</string>
     <string name="play_button_label">Play</string>
     <string name="pause_button_label">Pause</string>
+    <string name="pref_show_notification_label">Show notification</string>
+    <string name="pref_show_notification_key" translatable="false">notification</string>
 </resources>

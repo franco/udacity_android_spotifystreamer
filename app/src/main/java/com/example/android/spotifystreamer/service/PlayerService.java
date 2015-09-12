@@ -8,8 +8,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -19,13 +21,13 @@ import android.util.Log;
 
 import com.example.android.spotifystreamer.MediaNotificationManager;
 import com.example.android.spotifystreamer.Playback;
+import com.example.android.spotifystreamer.R;
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.RestAdapter;
 
 /**
  * This class manages the playback of songs. It creates a MediaSession and exposes it through its
@@ -51,9 +53,9 @@ public class PlayerService extends Service implements Playback.Callback {
 
     private Playback mPlayback;
 
-
     private final IBinder mPlayerBinder = new PlayerBinder();
     private MediaNotificationManager mMediaNotificationManager;
+    private boolean mShowNotification;
 
     @Override
     public void onCreate() {
@@ -74,7 +76,9 @@ public class PlayerService extends Service implements Playback.Callback {
 
         mMediaNotificationManager = new MediaNotificationManager(this);
 
-
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mShowNotification = mPrefs.getBoolean(getString(R.string.pref_show_notification_key),
+                getResources().getBoolean(R.bool.pref_show_notification_default));
     }
 
     @Override
@@ -124,6 +128,17 @@ public class PlayerService extends Service implements Playback.Callback {
 
     public MyTrack getCurrentSong() {
         return mTracks.get(mTrackPosition);
+    }
+
+    public void setShowNotification(boolean showNotification) {
+        mShowNotification = showNotification;
+        if (mShowNotification) {
+            if (mPlayback != null && mPlayback.getState() == PlaybackStateCompat.STATE_PLAYING) {
+                mMediaNotificationManager.startNotification();
+            }
+        } else {
+            mMediaNotificationManager.stopNotification();
+        }
     }
 
     @Override
@@ -191,7 +206,9 @@ public class PlayerService extends Service implements Playback.Callback {
         PlaybackStateCompat playbackState = stateBuilder.build();
         Log.d(LOG_TAG, "updatePlaybackState state=" + playbackState.getState());
         mSession.setPlaybackState(playbackState);
-        mMediaNotificationManager.startNotification();
+        if (mShowNotification) {
+            mMediaNotificationManager.startNotification();
+        }
     }
 
     private void updateMetadata() {
