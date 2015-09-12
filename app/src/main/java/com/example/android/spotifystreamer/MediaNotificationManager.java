@@ -235,16 +235,16 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 .setContentText(description.getSubtitle())
                 .setUsesChronometer(true);
 
-        notificationBuilder.addAction(android.R.drawable.ic_media_previous,
+        notificationBuilder.addAction(R.drawable.ic_skip_previous_white_24dp,
                 mService.getString(R.string.previews_button_label), mPreviousIntent);
         if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PAUSED) {
-            notificationBuilder.addAction(android.R.drawable.ic_media_play,
+            notificationBuilder.addAction(R.drawable.ic_play_arrow_white_24dp,
                     mService.getString(R.string.play_button_label), mPlayIntent);
         } else {
-            notificationBuilder.addAction(android.R.drawable.ic_media_pause,
+            notificationBuilder.addAction(R.drawable.ic_pause_white_24dp,
                     mService.getString(R.string.pause_button_label), mPauseIntent);
         }
-        notificationBuilder.addAction(android.R.drawable.ic_media_next,
+        notificationBuilder.addAction(R.drawable.ic_skip_next_white_24dp,
                 mService.getString(R.string.next_button_label), mNextIntent);
 
 
