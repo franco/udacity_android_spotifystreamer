@@ -65,13 +65,11 @@ public class PlayerFragment extends DialogFragment {
     private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback(){
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
-            Log.d(LOG_TAG, "playback state changed: " + state.getState());
             updatePlaybackState(state);
         }
 
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            Log.d(LOG_TAG, "Received new metadata " + metadata);
             if (metadata != null) {
                 updateMediaDescription();
             }
@@ -83,7 +81,6 @@ public class PlayerFragment extends DialogFragment {
 
     @Override
     public void onStart() {
-        Log.d(LOG_TAG, "onStart");
         super.onStart();
 
         // Bind to PlayerService
@@ -93,7 +90,6 @@ public class PlayerFragment extends DialogFragment {
 
     @Override
     public void onStop() {
-        Log.d(LOG_TAG, "onStop");
         super.onStop();
         if (mPlayerBound) {
             mMediaController.unregisterCallback(mCallback);
@@ -105,21 +101,13 @@ public class PlayerFragment extends DialogFragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(LOG_TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mScrubBarUpdater = new ScrubBarUpdater();
     }
 
     @Override
-    public void onResume() {
-        Log.d(LOG_TAG, "onResume");
-        super.onResume();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(LOG_TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
         mView = rootView;
 
@@ -181,7 +169,6 @@ public class PlayerFragment extends DialogFragment {
     }
 
     private void updateMediaDescription() {
-        Log.d(LOG_TAG, "updateMediaDescription");
         View rootView = mView;
         MyTrack song = mPlayerService.getCurrentSong();
         Artist artist = mPlayerService.getArtist();
@@ -207,8 +194,6 @@ public class PlayerFragment extends DialogFragment {
         if (state == null) {
             return;
         }
-        Log.d(LOG_TAG, "updatePlaybackState state=" + state.getState() + ", position=" + state.getPosition());
-
         mLastPlaybackState = state;
 
         switch (state.getState()) {
@@ -239,7 +224,6 @@ public class PlayerFragment extends DialogFragment {
     private ServiceConnection mPlayerConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            Log.d(LOG_TAG, "onServiceConnected");
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) iBinder;
             mPlayerService = binder.getService();
             mPlayerBound = true;
@@ -249,13 +233,11 @@ public class PlayerFragment extends DialogFragment {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(LOG_TAG, "onServiceDisconnected");
             mPlayerBound = false;
         }
     };
 
     private void connectToMediaSession(MediaSessionCompat.Token token) {
-        Log.d(LOG_TAG, "connectToMediaSession");
         try {
             mMediaController = new MediaControllerCompat(getActivity(), token);
             mMediaController.registerCallback(mCallback);
@@ -308,14 +290,11 @@ public class PlayerFragment extends DialogFragment {
         }
 
         private void updateProgress() {
-            Log.d(LOG_TAG, "updateProgress");
-
             if (mLastPlaybackState == null) {
                 return;
             }
 
             long currentPosition = mLastPlaybackState.getPosition();
-            Log.d(LOG_TAG, "updateProgress initial currentPosition="+currentPosition);
 
             if (mLastPlaybackState.getState() != PlaybackStateCompat.STATE_PAUSED) {
                 // Calculate the elapsed time between the last position update and now and unless
@@ -325,10 +304,6 @@ public class PlayerFragment extends DialogFragment {
                 long timeDelta = SystemClock.elapsedRealtime() -
                         mLastPlaybackState.getLastPositionUpdateTime();
                 currentPosition += (int) timeDelta * mLastPlaybackState.getPlaybackSpeed();
-
-                Log.d(LOG_TAG, "updateProgress lastPositionUpdateTime=" +
-                        mLastPlaybackState.getLastPositionUpdateTime() +
-                        ", timeDelta=" + timeDelta + ", currentPosition=" + currentPosition);
             }
             mControls.scrubBar.setProgress((int) currentPosition);
         }

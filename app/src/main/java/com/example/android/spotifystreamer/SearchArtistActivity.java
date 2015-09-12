@@ -77,8 +77,6 @@ public class SearchArtistActivity extends BaseActivity
         }
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

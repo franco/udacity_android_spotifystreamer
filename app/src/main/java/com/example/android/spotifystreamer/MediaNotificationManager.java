@@ -127,7 +127,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        Log.d(LOG_TAG, "Received intent with action " + action);
         switch (action) {
             case ACTION_PAUSE:
                 mMediaController.getTransportControls().pause();
@@ -174,7 +173,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 @Override
                 public void onPlaybackStateChanged(PlaybackStateCompat state) {
                     mPlaybackState = state;
-                    Log.d(LOG_TAG, "Received new playback state " + state);
                     if (state.getState() == PlaybackStateCompat.STATE_STOPPED
                             || state.getState() == PlaybackStateCompat.STATE_NONE) {
                         stopNotification();
@@ -186,13 +184,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 @Override
                 public void onMetadataChanged(MediaMetadataCompat metadata) {
                     mMetadata = metadata;
-                    Log.d(LOG_TAG, "Received new metadata " + metadata);
                     createAndNotifyNotification();
                 }
 
                 @Override
                 public void onSessionDestroyed() {
-                    Log.d(LOG_TAG, "Session was destroyed, resetting to new session token");
                     updateSessionToken();
                 }
             };
@@ -263,22 +259,17 @@ public class MediaNotificationManager extends BroadcastReceiver {
     }
 
     private void setNotificationPlaybackState(NotificationCompat.Builder builder) {
-        Log.d(LOG_TAG, "updateNotificationPlaybackState. mPlaybackState=" + mPlaybackState);
         if (mPlaybackState == null || !mStarted) {
-            Log.d(LOG_TAG, "updateNotificationPlaybackState. cancelling notification!");
             mService.stopForeground(true);
             return;
         }
         if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING
                 && mPlaybackState.getPosition() >= 0) {
-            Log.d(LOG_TAG, "updateNotificationPlaybackState. updating playback position to " +
-                    ((System.currentTimeMillis() - mPlaybackState.getPosition()) / 1000) + " seconds");
             builder
                     .setWhen(System.currentTimeMillis() - mPlaybackState.getPosition())
                     .setShowWhen(true)
                     .setUsesChronometer(true);
         } else {
-            Log.d(LOG_TAG, "updateNotificationPlaybackState. hiding playback position");
             builder
                     .setWhen(0)
                     .setShowWhen(false)

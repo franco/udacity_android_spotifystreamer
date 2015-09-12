@@ -55,7 +55,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private ServiceConnection playerConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            Log.d(LOG_TAG, "Service Connection established");
             PlayerService.PlayerBinder binder = (PlayerService.PlayerBinder) iBinder;
             mPlayerService = binder.getService();
             mPlayerBound = true;
@@ -66,12 +65,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName componentName) {
             // This method gets only called when the Server has crashed or been killed.
             mPlayerBound = false;
-            Log.d(LOG_TAG, "Service Connection disconncted");
         }
     };
 
     private void connectToMediaSession(MediaSessionCompat.Token token) {
-        Log.d(LOG_TAG, "connectToMediaSession");
         try {
             mMediaController = new MediaControllerCompat(this, token);
             mMediaController.registerCallback(mCallback);
@@ -149,7 +146,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                     mPlayerService.setShowNotification(isChecked);
                 }
 
-                Log.d(LOG_TAG, "store notification preference value=" + isChecked);
                 return true;
 
             default:
@@ -166,7 +162,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 getResources().getBoolean(R.bool.pref_show_notification_default));
         item = menu.findItem(R.id.show_notification_menu);
         item.setChecked(showNotification);
-        Log.d(LOG_TAG, "read notification pref value=" + showNotification);
         return super.onPrepareOptionsMenu(menu);
     }
 }

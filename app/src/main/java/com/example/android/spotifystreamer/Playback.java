@@ -9,7 +9,6 @@ import android.media.MediaPlayer;
 import android.media.session.PlaybackState;
 import android.os.PowerManager;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 
 import com.example.android.spotifystreamer.model.MyTrack;
 import com.example.android.spotifystreamer.service.PlayerService;
@@ -23,8 +22,6 @@ import java.io.IOException;
  */
 public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnSeekCompleteListener {
-
-    public static final String LOG_TAG = Playback.class.getSimpleName();
 
     private MediaPlayer mMediaPlayer;
     private PlayerService mService;
@@ -72,7 +69,6 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     }
 
     public Playback(PlayerService service) {
-        Log.d(LOG_TAG, "created Playback (service) " + this.hashCode());
         mService = service;
 
         // Init MediaPlayer
@@ -83,12 +79,6 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
         mMediaPlayer.setWakeMode(mService.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        Log.d(LOG_TAG, "(service) finalize Playback object " + this.hashCode());
     }
 
     public boolean isPlaying() {
@@ -105,8 +95,6 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     }
 
     public void play(MyTrack track) {
-        Log.d(LOG_TAG, "play song");
-
         if (mCurrentTrack == track)  {
             // Song is already loaded
             playSong();
@@ -146,8 +134,6 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     }
 
     public void seekTo(int position) {
-        Log.d(LOG_TAG, "seekTo called with " + position);
-
         if (mMediaPlayer.isPlaying()) {
             mState = PlaybackState.STATE_BUFFERING;
         }
@@ -180,8 +166,6 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     /** Called when MediaPlayer has completed a seek */
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-        Log.d(LOG_TAG, "onSeekComplete from MediaPlayer: " + mp.getCurrentPosition());
-
         if (mState == PlaybackState.STATE_BUFFERING) {
             mMediaPlayer.start();
             mState = PlaybackState.STATE_PLAYING;

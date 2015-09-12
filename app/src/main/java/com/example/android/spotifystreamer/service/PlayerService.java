@@ -59,7 +59,6 @@ public class PlayerService extends Service implements Playback.Callback {
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "onCreate (service) " + this.hashCode());
         super.onCreate();
         mPlayingQueue = new ArrayList<>();
         mTrackPosition = 0;
@@ -82,17 +81,8 @@ public class PlayerService extends Service implements Playback.Callback {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_TAG, "onStartCommand (service) " + this.hashCode());
-        return START_STICKY;
-    }
-
-
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(LOG_TAG, "onDestroy (service) " + this.hashCode());
         mSession.release();
     }
 
@@ -144,13 +134,11 @@ public class PlayerService extends Service implements Playback.Callback {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(LOG_TAG, "onBind (service)" + this.hashCode());
         return mPlayerBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(LOG_TAG, "onUnbind (service)" + this.hashCode());
         return false;
     }
 
@@ -161,7 +149,6 @@ public class PlayerService extends Service implements Playback.Callback {
     }
 
     private void sendSongChangedNotification(int trackPosition) {
-        Log.d(LOG_TAG, "send notification: SONG CHANGED");
         Intent i = new Intent(MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION);
         i.putExtra(SONG_POSITION_EXTRA, trackPosition);
         i.putExtra(ARTIST_EXTRA, mArtist);
@@ -181,7 +168,6 @@ public class PlayerService extends Service implements Playback.Callback {
      * @param error if not null, error message to present to the user.
      */
     private void updatePlaybackState(String error) {
-        Log.d(LOG_TAG, "updatePlaybackState, playback state=" + mPlayback.getState());
         long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
         if (mPlayback != null) {
             position = mPlayback.getCurrentStreamPosition();
@@ -204,7 +190,6 @@ public class PlayerService extends Service implements Playback.Callback {
         stateBuilder.setActiveQueueItemId(1);
 
         PlaybackStateCompat playbackState = stateBuilder.build();
-        Log.d(LOG_TAG, "updatePlaybackState state=" + playbackState.getState());
         mSession.setPlaybackState(playbackState);
         if (mShowNotification) {
             mMediaNotificationManager.startNotification();
@@ -253,7 +238,6 @@ public class PlayerService extends Service implements Playback.Callback {
 
     @Override
     public void onMetadataChanged() {
-        Log.d(LOG_TAG, "onMetadataChanged...");
         updateMetadata();
     }
 
@@ -285,25 +269,21 @@ public class PlayerService extends Service implements Playback.Callback {
     private final class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlay() {
-            Log.d(LOG_TAG, "MediaSessionCallback onPlay");
             handlingPlayRequest();
         }
 
         @Override
         public void onPause() {
-            Log.d(LOG_TAG, "MediaSessionCallback onPause");
             mPlayback.pause();
         }
 
         @Override
         public void onSkipToNext() {
-            Log.d(LOG_TAG, "MediaSessionCallback toNext");
             handleSkipToNextSongRequest();
         }
 
         @Override
         public void onSkipToPrevious() {
-            Log.d(LOG_TAG, "MediaSessionCallback onSkipToPrevious");
             if (!isFirstSong()) {
                 mTrackPosition--;
                 if (mPlayback.getState() == PlaybackStateCompat.STATE_PLAYING) {
@@ -315,13 +295,7 @@ public class PlayerService extends Service implements Playback.Callback {
         }
 
         @Override
-        public void onStop() {
-            Log.d(LOG_TAG, "MediaSessionCallback onStop");
-        }
-
-        @Override
         public void onSeekTo(long pos) {
-            Log.d(LOG_TAG, "MediaSessionCallback onSeekTo pos=" + pos);
             mPlayback.seekTo((int) pos); // this cast is ok as the scrub bar's position is int too
         }
     }
