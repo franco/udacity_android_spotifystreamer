@@ -87,6 +87,8 @@ public class PlayerService extends Service implements Playback.Callback {
         return START_STICKY;
     }
 
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -97,7 +99,7 @@ public class PlayerService extends Service implements Playback.Callback {
     public MediaSessionCompat.Token getSessionToken() {
         return mSession.getSessionToken();
     }
-    
+
     public void playTracks(ArrayList<MyTrack> tracks, int trackPosition, Artist artist) {
 
         mTracks = tracks;
@@ -149,7 +151,6 @@ public class PlayerService extends Service implements Playback.Callback {
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(LOG_TAG, "onUnbind (service)" + this.hashCode());
-//        O();
         return false;
     }
 

@@ -7,6 +7,7 @@ package com.example.android.spotifystreamer;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.session.PlaybackState;
+import android.os.PowerManager;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
@@ -81,6 +82,7 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
+        mMediaPlayer.setWakeMode(mService.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     @Override
