@@ -27,17 +27,31 @@
         android:layout_height="wrap_content"
         android:text="Ghost Stories"/>
 
-    <ImageView
-        android:id="@+id/album_artwork"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:layout_marginLeft="@dimen/player_artwork_horizontal_padding"
-        android:layout_marginRight="@dimen/player_artwork_horizontal_padding"
-        android:layout_marginTop="@dimen/player_artwork_vertical_padding"
-        android:layout_marginBottom="@dimen/player_artwork_vertical_padding"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/album_artwork"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:layout_marginLeft="@dimen/player_artwork_horizontal_padding"
+            android:layout_marginRight="@dimen/player_artwork_horizontal_padding"
+            android:layout_marginTop="@dimen/player_artwork_vertical_padding"
+            android:layout_marginBottom="@dimen/player_artwork_vertical_padding"/>
+
+        <ProgressBar
+            android:id="@+id/loadingIndicator"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+    </RelativeLayout>
     <TextView
         android:id="@+id/track_name"
         android:layout_width="wrap_content"

@@ -6,6 +6,7 @@ package com.example.android.spotifystreamer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.media.MediaMetadataCompat;
 
 /**
  * Parcelable POJO representing a track.
@@ -96,5 +97,14 @@ public class MyTrack implements Parcelable {
         result = 31 * result + (artworkUrl != null ? artworkUrl.hashCode() : 0);
         result = 31 * result + (previewUrl != null ? previewUrl.hashCode() : 0);
         return result;
+    }
+
+    public MediaMetadataCompat getMediaMetadata() {
+        MediaMetadataCompat.Builder metadataBuilder = new MediaMetadataCompat.Builder();
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, albumName);
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, trackName);
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ART_URI, artworkUrl);
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, thumbnailUrl);
+        return metadataBuilder.build();
     }
 }

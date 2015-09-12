@@ -14,12 +14,25 @@
               android:gravity="center"
               tools:context="com.example.android.spotifystreamer.PlayerFragment">
 
-    <ImageView
-        android:id="@+id/album_artwork"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher"
-        android:layout_weight="1"/>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/album_artwork"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"
+            android:layout_weight="1"/>
+
+        <ProgressBar
+            android:id="@+id/loadingIndicator"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

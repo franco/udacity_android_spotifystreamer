@@ -4,164 +4,101 @@
 
 package com.example.android.spotifystreamer.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.example.android.spotifystreamer.MediaNotificationManager;
+import com.example.android.spotifystreamer.Playback;
 import com.example.android.spotifystreamer.model.Artist;
 import com.example.android.spotifystreamer.model.MyTrack;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by franco on 02/08/15.
+ * This class manages the playback of songs. It creates a MediaSession and exposes it through its
+ * MediaSession.Token, which allows th eclient to create a MediaController that connects to and
+ * send control commands to the Media Session remotely.
  */
-public class PlayerService extends Service
-        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener {
+public class PlayerService extends Service implements Playback.Callback {
 
-    public static final String MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION =
-            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PLAYBACK_STARTED";
-    public static final String MUSIC_PLAYER_PREPARING_NOTIFICATION =
-            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PREPARING";
-    public static final String MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION =
-            "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.PLAYBACK_STOPPED";
+    private static final String LOG_TAG = PlayerService.class.getSimpleName();
+
     public static final String MUSIC_PLAYER_SONG_CHANGED_NOTIFICATION =
             "com.example.android.spotifystreamer.MUSIC_PLAYER_NOTIFICATION.SONG_CHANGED";
     public static final String SONG_POSITION_EXTRA = "song_position_exra";
     public static final String ARTIST_EXTRA = "artist_exra";
-
-
-
-    private static final String LOG_TAG = PlayerService.class.getSimpleName();
+    private static final String MEDIA_SESSION_TAG = "media_session";
 
     private int mTrackPosition;
-    private MediaPlayer mMediaPlayer;
     private ArrayList<MyTrack> mTracks;
     private Artist mArtist;
-    private MyTrack mCurrentlyLoadedTrack;
-    private boolean mIsPrepared;
+
+    private MediaSessionCompat mSession;
+    private List<MediaSessionCompat.QueueItem> mPlayingQueue;
+
+    private Playback mPlayback;
+
 
     private final IBinder mPlayerBinder = new PlayerBinder();
+    private MediaNotificationManager mMediaNotificationManager;
 
     @Override
     public void onCreate() {
+        Log.d(LOG_TAG, "onCreate service " + this.hashCode());
         super.onCreate();
+        mPlayingQueue = new ArrayList<>();
         mTrackPosition = 0;
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setOnErrorListener(this);
-        mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnCompletionListener(this);
-        // TODO wakelock and foreground
-//            mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        Log.d(LOG_TAG, "onCreate Service " + this.hashCode());
+        mPlayback = new Playback(this);
+        mPlayback.setCallback(this);
 
+        // Start a new MediaSession
+        ComponentName mediaButtonEventReceiver = null; // TODO this must be set for pre-LOLLIPOP
+        mSession = new MediaSessionCompat(getApplicationContext(), MEDIA_SESSION_TAG,
+                mediaButtonEventReceiver, null);
+        mSession.setCallback(new MediaSessionCallback());
+        mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mMediaNotificationManager = new MediaNotificationManager(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(LOG_TAG, "onDestroy Service " + this.hashCode());
+        mSession.release();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        // startForeground(notification);
-
-        // reset player
-        Log.d(LOG_TAG, "onStartCommand");
-
-
-        return 0;
+    public MediaSessionCompat.Token getSessionToken() {
+        return mSession.getSessionToken();
     }
 
+    // TODO: rename! this is now more an initialization than a play method
     public void playTracks(ArrayList<MyTrack> tracks, int trackPosition, Artist artist) {
 
-        // Only start playing requested song is it is another then the already loaded song.
-        if (!tracks.get(trackPosition).equals(mCurrentlyLoadedTrack)) {
-            mTracks = tracks;
-            mTrackPosition = trackPosition;
-            mArtist = artist;
-            mIsPrepared = false;
+        mTracks = tracks;
+        mTrackPosition = trackPosition;
+        mArtist = artist;
+        mPlayingQueue = new ArrayList<>();
+        long i = 0;
+        for (MyTrack track: mTracks) {
+            mPlayingQueue.add(new MediaSessionCompat.QueueItem(track.getMediaMetadata().getDescription(), i));
+            i++;
         }
-
-        playSong();
-    }
-
-    public void playSong() {
-        Log.d(LOG_TAG, "playSong");
-
-        if (mIsPrepared) {
-            startSong();
-        } else {
-            sendDownloadingNotification();
-
-            mMediaPlayer.reset();
-
-            MyTrack track = mTracks.get(mTrackPosition);
-
-            try {
-                mMediaPlayer.setDataSource(track.previewUrl);
-            } catch (IOException ioe) {
-                //throw new StreamingException(ioe.getMessage());
-                // TODO what to do in this case?
-            } catch (IllegalArgumentException iae) {
-                //            throw new StreamingException(iae.getMessage());
-                // TODO what do do in this case
-            }
-
-            Log.d(LOG_TAG, "calling prepareAsync... ");
-            mMediaPlayer.prepareAsync(); // prepare async to not block main thread
-        }
-    }
-
-    public void playNextSong() {
-        if (!isLastSong()) {
-            mTrackPosition++;
-            mIsPrepared = false;
-            playSong();
-            sendSongChangedNotification(mTrackPosition);
-        }
-    }
-
-    public void playPrevSong() {
-        if (!isFirstSong()) {
-            mTrackPosition--;
-            mIsPrepared = false;
-            playSong();
-            sendSongChangedNotification(mTrackPosition);
-
-        }
-    }
-
-    public void pauseSong() {
-        mMediaPlayer.pause();
-        sendPlaybackStoppedNotification();
-    }
-
-    public void startSong() {
-        mMediaPlayer.start();
-        sendPlaybackStartedNotification();
-    }
-
-    public void seekTo(int position) {
-        mMediaPlayer.seekTo(position);
-    }
-
-    public boolean isPlaying() {
-        return mMediaPlayer.isPlaying();
-    }
-
-    /** Returns the current position in ms */
-    public int getSongProgress() {
-        return mMediaPlayer.getCurrentPosition();
+        mSession.setQueue(mPlayingQueue);
+        mSession.setActive(true);
+        mSession.setMetadata(getCurrentSong().getMediaMetadata());
     }
 
     public boolean isFirstSong() {
@@ -171,16 +108,12 @@ public class PlayerService extends Service
         return mTrackPosition == mTracks.size() - 1;
     }
 
-    public int getCurrentPosition() {
-        return mTrackPosition;
-    }
-
-    public ArrayList<MyTrack> getSongs() {
-        return mTracks;
-    }
-
     public Artist getArtist() {
         return mArtist;
+    }
+
+    public MyTrack getCurrentSong() {
+        return mTracks.get(mTrackPosition);
     }
 
     @Override
@@ -188,40 +121,12 @@ public class PlayerService extends Service
         return mPlayerBinder;
     }
 
-//    @Override
-//    public boolean onUnbind(Intent intent) {
-//        mMediaPlayer.stop();
-//        mMediaPlayer.release();
-//        return false;
-//    }
-
     @Override
-    public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+    public boolean onUnbind(Intent intent) {
+        Log.d(LOG_TAG, "onUnbind");
+        stopSelf();
         return false;
     }
-
-    @Override
-    public void onPrepared(MediaPlayer mediaPlayer) {
-        Log.d(LOG_TAG, "onPrepared called.... starting mediaPlayer.start()");
-        mCurrentlyLoadedTrack = mTracks.get(mTrackPosition);
-        mIsPrepared = true;
-        playSong();
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        if (isLastSong()) {
-            sendPlaybackStoppedNotification();
-        } else {
-            playNextSong();
-        }
-    }
-
-    public static class StreamingException extends Exception {
-        public StreamingException(String detailMessage) {
-            super(detailMessage);
-        }
-    };
 
     public class PlayerBinder extends Binder {
         public PlayerService getService() {
@@ -237,22 +142,158 @@ public class PlayerService extends Service
         broadcastNotification(i);
     }
 
-    private void sendPlaybackStartedNotification() {
-        Log.d(LOG_TAG, "send notification: PLAYBACK_STARTED");
-        broadcastNotification(new Intent(MUSIC_PLAYER_PLAYBACK_STARTED_NOTIFICATION));
-    }
-
-    private void sendPlaybackStoppedNotification() {
-        Log.d(LOG_TAG, "send notification: PLAYBACK_STOPPED");
-        broadcastNotification(new Intent(MUSIC_PLAYER_PLAYBACK_STOPPED_NOTIFICATION));
-    }
-
-    private void sendDownloadingNotification() {
-        Log.d(LOG_TAG, "send notification: PREPARING");
-        broadcastNotification(new Intent(MUSIC_PLAYER_PREPARING_NOTIFICATION));
-    }
-
     private void broadcastNotification(Intent i) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+    }
+
+    /**
+     * Update the current media player state, optionally showing an error message.
+     *
+     * This method was inspired from the sample UniversalMusicPlayer code
+     * https://github.com/googlesamples/android-UniversalMusicPlayer
+     *
+     * @param error if not null, error message to present to the user.
+     */
+    private void updatePlaybackState(String error) {
+        Log.d(LOG_TAG, "updatePlaybackState, playback state=" + mPlayback.getState());
+        long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        if (mPlayback != null) {
+            position = mPlayback.getCurrentStreamPosition();
+        }
+
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(getAvailableActions());
+
+        @PlaybackStateCompat.State int state = mPlayback.getState();
+
+        // If there is an error message, send it to the playback state:
+        if (error != null) {
+            // Error states are really only supposed to be used for errors that cause playback to
+            // stop unexpectedly and persist until the user takes action to fix it.
+            stateBuilder.setErrorMessage(error);
+            state = PlaybackStateCompat.STATE_ERROR;
+        }
+
+        stateBuilder.setState(state, position, 1.0f);
+        stateBuilder.setActiveQueueItemId(1);
+
+        PlaybackStateCompat playbackState = stateBuilder.build();
+        Log.d(LOG_TAG, "updatePlaybackState state=" + playbackState.getState());
+        mSession.setPlaybackState(playbackState);
+        mMediaNotificationManager.startNotification();
+        buildNotification();
+    }
+
+    private void updateMetadata() {
+        MediaMetadataCompat track = getCurrentSong().getMediaMetadata();
+        mSession.setMetadata(track);
+    }
+
+
+    private @PlaybackStateCompat.Actions long getAvailableActions() {
+        long actions = PlaybackStateCompat.ACTION_PLAY;
+        if (mTracks == null || mTracks.isEmpty()) {
+            return actions;
+        }
+
+        if (mPlayback.isPlaying()) {
+            actions |= PlaybackStateCompat.ACTION_PAUSE;
+        }
+        if (!isFirstSong()) {
+            actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+        }
+        if (!isLastSong()) {
+            actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+        }
+        return actions;
+    }
+
+
+    @Override
+    public void onCompletion() {
+        handleSkipToNextSongRequest();
+    }
+
+    @Override
+    public void onPlaybackStatusChanged(int state) {
+        updatePlaybackState(null);
+    }
+
+    @Override
+    public void onError(String error) {
+        updatePlaybackState(error);
+    }
+
+    @Override
+    public void onMetadataChanged() {
+        Log.d(LOG_TAG, "onMetadataChanged...");
+        updateMetadata();
+    }
+
+    private void buildNotification() {
+        mMediaNotificationManager.startNotification();
+    }
+
+    private void handleSkipToNextSongRequest() {
+        if (!isLastSong()) {
+            mTrackPosition++;
+            if (mPlayback.getState() == PlaybackStateCompat.STATE_PLAYING) {
+                mPlayback.play(getCurrentSong());
+            }
+            updateMetadata();
+            sendSongChangedNotification(mTrackPosition);
+        }
+    }
+
+    private NotificationCompat.Action generateAction( int icon, String title, String intentAction ) {
+        Intent intent = new Intent( getApplicationContext().getApplicationContext(), PlayerService.class );
+        intent.setAction( intentAction );
+        PendingIntent pendingIntent =
+                PendingIntent.getService(getApplicationContext().getApplicationContext(), 1, intent, 0);
+        return new NotificationCompat.Action.Builder( icon, title, pendingIntent ).build();
+    }
+
+    private final class MediaSessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlay() {
+            Log.d(LOG_TAG, "MediaSessionCallback onPlay");
+            mPlayback.play(getCurrentSong());
+        }
+
+        @Override
+        public void onPause() {
+            Log.d(LOG_TAG, "MediaSessionCallback onPause");
+            mPlayback.pause();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            Log.d(LOG_TAG, "MediaSessionCallback toNext");
+            handleSkipToNextSongRequest();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            Log.d(LOG_TAG, "MediaSessionCallback onSkipToPrevious");
+            if (!isFirstSong()) {
+                mTrackPosition--;
+                if (mPlayback.getState() == PlaybackStateCompat.STATE_PLAYING) {
+                    mPlayback.play(getCurrentSong());
+                }
+                updateMetadata();
+                sendSongChangedNotification(mTrackPosition);
+            }
+        }
+
+        @Override
+        public void onStop() {
+            Log.d(LOG_TAG, "MediaSessionCallback onStop");
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            Log.d(LOG_TAG, "MediaSessionCallback onSeekTo pos=" + pos);
+            mPlayback.seekTo((int) pos); // this cast is ok as the scrub bar's position is int too
+        }
     }
 }

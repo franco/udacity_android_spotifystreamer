@@ -17,5 +17,8 @@
     <string name="neutral_button_label">OK</string>
     <string name="track_preview_duration" translatable="false">0:30</string>
     <string name="streaming">Streaming...</string>
-
+    <string name="previews_button_label">Previews</string>
+    <string name="next_button_label">Next</string>
+    <string name="play_button_label">Play</string>
+    <string name="pause_button_label">Pause</string>
 </resources>

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,8 +70,7 @@ public class TopTracksFragment extends Fragment {
             int position = intent.getIntExtra(PlayerService.SONG_POSITION_EXTRA, 0);
             Artist artist = intent.getParcelableExtra(PlayerService.ARTIST_EXTRA);
             if (mArtist == artist) {
-                mTracksListView.setItemChecked(position, true);
-//                mTracksListView.setSelection(mPosition); // make sure selected item is in view
+                mTracksListView.setItemChecked(position, true); //make sure selected item is in view
             }
             mPosition = position;
         }
@@ -100,7 +100,7 @@ public class TopTracksFragment extends Fragment {
 
         if (mArtist != null) {
             // Set action bar subtitle
-            ((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(mArtist.name);
         }
 
         // Get a reference to the ListView, and attach the adapter

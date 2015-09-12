@@ -51,9 +51,9 @@ public class SearchArtistFragment extends Fragment {
     private int mPosition = ListView.INVALID_POSITION;
 
 
-    public interface Callback {
+    public interface ArtistSelectedCallback {
         /** Callback for when an item has been selected. */
-        void onItemSelected(Artist artist);
+        void onArtistSelected(Artist artist);
     }
 
     public SearchArtistFragment() {
@@ -79,8 +79,8 @@ public class SearchArtistFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Artist artist = mArtistsAdapter.getItem(position);
-                ((Callback) getActivity())
-                        .onItemSelected(artist);
+                ((ArtistSelectedCallback) getActivity())
+                        .onArtistSelected(artist);
                 mPosition = position;
             }
         });
