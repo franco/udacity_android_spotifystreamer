@@ -35,7 +35,7 @@
             android:id="@+id/album_artwork"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/placeholder_image"
             android:scaleType="centerCrop"
             android:adjustViewBounds="true"
             android:layout_marginLeft="@dimen/player_artwork_horizontal_padding"
@@ -99,25 +99,27 @@
             android:id="@+id/prev_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_previous"/>
-
+            android:src="@drawable/ic_skip_previous_black_36dp"
+            style="?android:borderlessButtonStyle"/>
         <ImageButton
             android:id="@+id/pause_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_pause"
+            android:src="@drawable/ic_pause_black_36dp"
+            style="?android:borderlessButtonStyle"
             android:visibility="gone"/>
-
         <ImageButton
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_play"/>
+            android:src="@drawable/ic_play_arrow_black_36dp"
+            style="?android:borderlessButtonStyle"/>
         <ImageButton
             android:id="@+id/next_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_next"/>
+            android:src="@drawable/ic_skip_next_black_36dp"
+            style="?android:borderlessButtonStyle"/>
 
     </LinearLayout>
 

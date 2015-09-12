@@ -2,14 +2,10 @@
   ~ Copyright (c) 2015 Franco Sebregondi.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:paddingLeft="@dimen/player_horizontal_margin"
-              android:paddingRight="@dimen/player_horizontal_margin"
-              android:paddingTop="@dimen/player_vertical_margin"
-              android:paddingBottom="@dimen/player_vertical_margin"
               android:orientation="horizontal"
               android:gravity="center"
               tools:context="com.example.android.spotifystreamer.PlayerFragment">
@@ -20,9 +16,10 @@
 
         <ImageView
             android:id="@+id/album_artwork"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/ic_launcher"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/placeholder_image"
+            android:scaleType="centerCrop"
             android:layout_weight="1"/>
 
         <ProgressBar
@@ -35,34 +32,51 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:background="@color/player_bar_land"
+            android:paddingLeft="@dimen/player_horizontal_margin"
+            android:paddingRight="@dimen/player_horizontal_margin">
+            <TextView
+                android:id="@+id/artist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Coldplay"
+                android:textColor="@color/player_text_land"/>
+            <TextView
+                android:id="@+id/album_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ghost Stories"
+                android:textColor="@color/player_text_land"/>
+            <TextView
+                android:id="@+id/track_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ghost Stories"
+                android:textColor="@color/player_text_land"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_gravity="center_horizontal|bottom"
         android:gravity="center_horizontal"
-        android:layout_weight="2">
-
-        <TextView
-            android:id="@+id/artist_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Coldplay"/>
-
-
-        <TextView
-            android:id="@+id/album_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ghost Stories"/>
-
-        <TextView
-            android:id="@+id/track_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ghost Stories"/>
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/player_horizontal_margin"
+        android:paddingRight="@dimen/player_horizontal_margin">
 
         <SeekBar
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/seekBar"/>
 
         <LinearLayout
@@ -74,7 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="0:00"/>
+                android:text="0:00"
+                android:textColor="@color/player_text_land"/>/>
             <TextView
                 android:id="@+id/track_downloading_indicator"
                 android:layout_width="match_parent"
@@ -82,14 +97,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/streaming"
-                android:visibility="invisible"/>
+                android:visibility="invisible"
+                android:textColor="@color/player_text_land"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="right"
-                android:text="@string/track_preview_duration"/>
+                android:text="@string/track_preview_duration"
+                android:textColor="@color/player_text_land"/>/>
         </LinearLayout>
 
         <LinearLayout
@@ -100,25 +117,29 @@
                 android:id="@+id/prev_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_previous"/>
+                android:src="@drawable/ic_skip_previous_white_48dp"
+                style="?android:borderlessButtonStyle"/>
 
             <ImageButton
                 android:id="@+id/pause_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_pause"
+                android:src="@drawable/ic_pause_white_48dp"
+                style="?android:borderlessButtonStyle"
                 android:visibility="gone"/>
 
             <ImageButton
                 android:id="@+id/play_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_play"/>
+                android:src="@drawable/ic_play_arrow_white_48dp"
+                style="?android:borderlessButtonStyle"/>
             <ImageButton
                 android:id="@+id/next_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_next"/>
+                android:src="@drawable/ic_skip_next_white_48dp"
+                style="?android:borderlessButtonStyle"/>
 
         </LinearLayout>
 
@@ -127,5 +148,5 @@
 
 
 
-</LinearLayout>
+</FrameLayout>
 
