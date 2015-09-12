@@ -200,6 +200,7 @@ public class PlayerFragment extends DialogFragment {
         }
         TextView trackNameView = (TextView) rootView.findViewById(R.id.track_name);
         trackNameView.setText(song.trackName);
+        mControls.scrubBar.setProgress(0);
     }
 
     private void updatePlaybackState(PlaybackStateCompat state) {
@@ -270,7 +271,7 @@ public class PlayerFragment extends DialogFragment {
      */
     private class ScrubBarUpdater {
         private static final long PROGRESS_UPDATE_INTERNAL = 1000;
-        private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
+        private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 1;
 
         private final Handler mHandler = new Handler();
 
