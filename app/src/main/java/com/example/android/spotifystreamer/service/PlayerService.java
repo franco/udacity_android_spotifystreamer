@@ -25,6 +25,8 @@ import com.example.android.spotifystreamer.model.MyTrack;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit.RestAdapter;
+
 /**
  * This class manages the playback of songs. It creates a MediaSession and exposes it through its
  * MediaSession.Token, which allows th eclient to create a MediaController that connects to and
@@ -55,7 +57,7 @@ public class PlayerService extends Service implements Playback.Callback {
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "onCreate service " + this.hashCode());
+        Log.d(LOG_TAG, "onCreate (service) " + this.hashCode());
         super.onCreate();
         mPlayingQueue = new ArrayList<>();
         mTrackPosition = 0;
@@ -71,12 +73,20 @@ public class PlayerService extends Service implements Playback.Callback {
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         mMediaNotificationManager = new MediaNotificationManager(this);
+
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(LOG_TAG, "onStartCommand (service) " + this.hashCode());
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(LOG_TAG, "onDestroy Service " + this.hashCode());
+        Log.d(LOG_TAG, "onDestroy (service) " + this.hashCode());
         mSession.release();
     }
 
@@ -118,13 +128,14 @@ public class PlayerService extends Service implements Playback.Callback {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(LOG_TAG, "onBind (service)" + this.hashCode());
         return mPlayerBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(LOG_TAG, "onUnbind");
-        stopSelf();
+        Log.d(LOG_TAG, "onUnbind (service)" + this.hashCode());
+//        stopSelf();
         return false;
     }
 
@@ -181,7 +192,6 @@ public class PlayerService extends Service implements Playback.Callback {
         Log.d(LOG_TAG, "updatePlaybackState state=" + playbackState.getState());
         mSession.setPlaybackState(playbackState);
         mMediaNotificationManager.startNotification();
-        buildNotification();
     }
 
     private void updateMetadata() {
@@ -230,8 +240,10 @@ public class PlayerService extends Service implements Playback.Callback {
         updateMetadata();
     }
 
-    private void buildNotification() {
-        mMediaNotificationManager.startNotification();
+    private void handlingPlayRequest() {
+        mPlayback.play(getCurrentSong());
+        // call startService in order to keep the music service running
+        startService(new Intent(getApplicationContext(), PlayerService.class));
     }
 
     private void handleSkipToNextSongRequest() {
@@ -257,7 +269,7 @@ public class PlayerService extends Service implements Playback.Callback {
         @Override
         public void onPlay() {
             Log.d(LOG_TAG, "MediaSessionCallback onPlay");
-            mPlayback.play(getCurrentSong());
+            handlingPlayRequest();
         }
 
         @Override

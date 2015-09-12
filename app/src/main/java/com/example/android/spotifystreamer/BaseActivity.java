@@ -106,7 +106,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        startService(mPlayIntent); // explicitly start service to keep it running after unbinding
         bindService(mPlayIntent, playerConnection, BIND_AUTO_CREATE);
     }
 

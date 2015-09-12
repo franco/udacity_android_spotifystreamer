@@ -71,6 +71,7 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
     }
 
     public Playback(PlayerService service) {
+        Log.d(LOG_TAG, "created Playback (service) " + this.hashCode());
         mService = service;
 
         // Init MediaPlayer
@@ -82,6 +83,11 @@ public class Playback implements MediaPlayer.OnPreparedListener, MediaPlayer.OnE
         mMediaPlayer.setOnSeekCompleteListener(this);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        Log.d(LOG_TAG, "(service) finalize Playback object " + this.hashCode());
+    }
 
     public boolean isPlaying() {
         return mMediaPlayer != null && mMediaPlayer.isPlaying();
