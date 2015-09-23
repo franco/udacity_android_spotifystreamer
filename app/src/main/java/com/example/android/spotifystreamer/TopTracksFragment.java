@@ -45,7 +45,7 @@ import retrofit.RetrofitError;
  */
 public class TopTracksFragment extends Fragment {
 
-    public static final String EXTRA_ARTIST = "artist";
+    public static final String ARG_ARTIST = "artist";
     private static final String LOG_TAG = TopTracksFragment.class.getSimpleName();
     private static final String STATE_ARTIST = "state_artist";
     private static final String STATE_TRACKS = "state_tracks";
@@ -56,6 +56,7 @@ public class TopTracksFragment extends Fragment {
     private TopTracksAdapter mTopTracksAdapter;
     private ListView mTracksListView;
     private int mPosition = ListView.INVALID_POSITION;
+    private OnTrackSelectedListener mListener;
     private BroadcastReceiver mOnMusicPlayerSongChanged = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -67,6 +68,21 @@ public class TopTracksFragment extends Fragment {
             mPosition = position;
         }
     };
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param artist Artist
+     * @return A new instance of fragment TopTracksFragment.
+     */
+    public static TopTracksFragment newInstance(Artist artist) {
+        TopTracksFragment fragment = new TopTracksFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_ARTIST, artist);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public TopTracksFragment() {
     }
@@ -80,9 +96,8 @@ public class TopTracksFragment extends Fragment {
             mArtist = savedInstanceState.getParcelable(STATE_ARTIST);
             mTopTracks = savedInstanceState.getParcelableArrayList(STATE_TRACKS);
         } else {
-            Bundle arguments = getArguments();
-            if (arguments != null) {
-                mArtist = arguments.getParcelable(TopTracksFragment.EXTRA_ARTIST);
+            if (getArguments() != null) {
+                mArtist = getArguments().getParcelable(ARG_ARTIST);
                 new SearchTrackTask(getActivity()).execute(mArtist.id);
             }
             mTopTracks = new ArrayList<>();
@@ -104,8 +119,9 @@ public class TopTracksFragment extends Fragment {
         mTracksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                ((TrackSelectedCallback) getActivity())
-                        .onTrackSelected(mArtist, mTopTracks, position);
+                if (mListener != null) {
+                    mListener.onTrackSelected(mArtist, mTopTracks, position);
+                }
                 mPosition = position;
             }
         });
@@ -144,7 +160,24 @@ public class TopTracksFragment extends Fragment {
         super.onStop();
     }
 
-    public interface TrackSelectedCallback {
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mListener = (OnTrackSelectedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnTrackSelectedListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface OnTrackSelectedListener {
         /**
          * Callback for when an item has been selected.
          */

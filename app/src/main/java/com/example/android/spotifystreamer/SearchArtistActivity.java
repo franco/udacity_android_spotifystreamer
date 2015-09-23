@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * from BaseActivity which handles now-playing button and connection to PlayerService.
  */
 public class SearchArtistActivity extends BaseActivity
-        implements SearchArtistFragment.ArtistSelectedCallback, TopTracksFragment.TrackSelectedCallback {
+        implements SearchArtistFragment.ArtistSelectedCallback, TopTracksFragment.OnTrackSelectedListener {
 
     public static final String TOPTRACKSFRAGMENT_TAG = "TTFAG";
     public static final String PLAYERFRAGMENT_TAG = "PFAG";
@@ -50,17 +50,13 @@ public class SearchArtistActivity extends BaseActivity
         if (mTwoPane) {
             // In two-pain mode, show the top-tracks view in this activity by adding or replacing
             // the top-track fragment using a fragment transaction.
-            Bundle args = new Bundle();
-            args.putParcelable(TopTracksFragment.EXTRA_ARTIST, artist);
-
-            TopTracksFragment fragment = new TopTracksFragment();
-            fragment.setArguments(args);
+            TopTracksFragment fragment = TopTracksFragment.newInstance(artist);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_top_tracks, fragment, TOPTRACKSFRAGMENT_TAG)
                     .commit();
         } else {
             Intent intent = new Intent(this, TopTracksActivity.class)
-                    .putExtra(TopTracksFragment.EXTRA_ARTIST, artist);
+                    .putExtra(TopTracksActivity.EXTRA_ARTIST, artist);
             startActivity(intent);
         }
     }

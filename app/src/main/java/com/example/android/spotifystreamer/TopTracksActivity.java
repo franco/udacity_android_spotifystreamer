@@ -17,23 +17,18 @@ import java.util.ArrayList;
  * now-playing button and connection to PlayerService.
  */
 public class TopTracksActivity extends BaseActivity
-        implements TopTracksFragment.TrackSelectedCallback {
+        implements TopTracksFragment.OnTrackSelectedListener {
+
+    public static final String EXTRA_ARTIST = "artist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_tracks);
         if (savedInstanceState == null) {
-
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(TopTracksFragment.EXTRA_ARTIST,
-                    getIntent().getParcelableExtra(TopTracksFragment.EXTRA_ARTIST));
-
-            TopTracksFragment fragment = new TopTracksFragment();
-            fragment.setArguments(arguments);
-
+            Artist artist = getIntent().getParcelableExtra(EXTRA_ARTIST);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_top_tracks, fragment)
+                    .add(R.id.fragment_top_tracks, TopTracksFragment.newInstance(artist))
                     .commit();
         }
     }
